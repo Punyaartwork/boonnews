@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "temple": "วัดพระธรรมกาย",
+    "title": "พิธีทอดผ้าป่าวันวิสาขบูชา",
+    "date": "2026-05-22",
+    "date_display": "วันที่ 22 พฤษภาคม 2569",
+    "categories": ["ทำบุญ", "เทศกาล", "งานบุญ"],
+    "important": true,
+    "contact": "02-395-0098",
+    "cards": ["2026-05-22_dhammakaya_01.jpg"],
+    "card_count": 1
+  },
+  {
+    "id": 2,
+    "temple": "วัดสระเกศราชวรมหาวิหาร",
+    "title": "อบรมปฏิบัติธรรมประจำเดือนมิถุนายน",
+    "date": "2026-06-14",
+    "date_display": "วันที่ 14 มิถุนายน 2569",
+    "categories": ["งานอบรม", "ทำบุญ"],
+    "important": false,
+    "contact": "02-223-3331",
+    "cards": ["2026-06-14_sraket_01.jpg"],
+    "card_count": 1
+  },
+  {
+    "id": 3,
+    "temple": "วัดไทยพุทธคยา ประเทศอินเดีย",
+    "title": "พิธีอาสาฬหบูชาและเข้าพรรษา ณ พุทธคยา",
+    "date": "2026-07-29",
+    "date_display": "วันที่ 29 กรกฎาคม 2569",
+    "categories": ["เทศกาล", "ต่างประเทศ", "งานบุญ"],
+    "important": true,
+    "contact": "info@watthaibuddhagaya.org",
+    "cards": ["2026-07-29_watthaibuddhagaya_01.jpg"],
+    "card_count": 1
+  }
+]

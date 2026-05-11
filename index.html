@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>บุญนิวส์ — ข่าวงานบุญและกิจกรรมวัด</title>
+  <meta name="description" content="รวมข่าวงานบุญ พิธีกรรม และกิจกรรมของวัด ทั้งในและต่างประเทศ">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold-dark: #8a6118;
+      --gold: #b8860b;
+      --gold-light: #d4a82a;
+      --gold-tint: #f5ecd2;
+      --brown: #5d3a2e;
+      --brown-light: #8b5a3c;
+      --cream: #fdfaf3;
+      --cream-deep: #f7eedb;
+      --ink: #2b1d12;
+      --ink-soft: #5e4a3a;
+      --red: #c0392b;
+      --shadow: 0 4px 18px rgba(93, 58, 46, 0.08);
+      --shadow-hover: 0 8px 28px rgba(93, 58, 46, 0.16);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { -webkit-text-size-adjust: 100%; }
+
+    body {
+      font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.55;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { color: inherit; }
+
+    /* ========== HEADER ========== */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: linear-gradient(180deg, #fffaee 0%, var(--cream-deep) 100%);
+      border-bottom: 3px solid var(--gold);
+      box-shadow: 0 2px 12px rgba(184, 134, 11, 0.12);
+    }
+
+    .header-top {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px 20px 8px;
+      text-align: center;
+    }
+
+    .site-title {
+      font-family: 'Noto Serif Thai', serif;
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: var(--gold-dark);
+      letter-spacing: 1px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .site-title::before { content: "☸"; color: var(--gold); }
+    .site-title::after  { content: "☸"; color: var(--gold); }
+
+    .site-tagline {
+      font-size: 0.95rem;
+      color: var(--brown);
+      margin-top: 2px;
+    }
+
+    .filters {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 8px 20px 14px;
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 6px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 4px 0;
+      scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .filter-row::-webkit-scrollbar { height: 4px; }
+    .filter-row::-webkit-scrollbar-thumb { background: var(--gold-light); border-radius: 4px; }
+
+    .filter-row + .filter-row { margin-top: 6px; }
+
+    .filter-btn {
+      flex: 0 0 auto;
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 500;
+      padding: 7px 14px;
+      border: 1.5px solid var(--gold-light);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--brown);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--gold);
+      background: var(--gold-tint);
+    }
+
+    .filter-btn.active {
+      background: var(--gold);
+      border-color: var(--gold-dark);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* ========== MAIN ========== */
+    main {
+      flex: 1;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .result-info {
+      font-size: 0.92rem;
+      color: var(--ink-soft);
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .result-info strong { color: var(--gold-dark); font-weight: 600; }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    }
+
+    .empty {
+      text-align: center;
+      padding: 50px 20px;
+      color: var(--ink-soft);
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    /* ========== CARD ========== */
+    .card {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid var(--cream-deep);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px 0;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: var(--gold-tint);
+      color: var(--gold-dark);
+      border: 1px solid var(--gold-light);
+      letter-spacing: 0.3px;
+    }
+
+    .tag-more {
+      position: relative;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--brown-light);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .tag-more:hover { background: var(--brown); }
+
+    .tag-popup {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      background: var(--ink);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      z-index: 10;
+      display: none;
+    }
+
+    .tag-popup.show { display: block; }
+    .tag-popup::before {
+      content: "";
+      position: absolute;
+      top: -5px;
+      left: 12px;
+      border: 5px solid transparent;
+      border-bottom-color: var(--ink);
+      border-top: 0;
+    }
+
+    .badge-important {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--red);
+    }
+
+    .countdown {
+      margin-left: auto;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--brown);
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .countdown.soon { color: var(--red); }
+    .countdown.today {
+      background: var(--red);
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    .card-body { padding: 10px 16px 14px; flex: 1; }
+
+    .card-temple {
+      font-family: 'Noto Serif Thai', serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--gold-dark);
+      margin-top: 4px;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .meta-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.93rem;
+      color: var(--ink-soft);
+      margin-top: 8px;
+    }
+
+    .meta-row .icon { font-size: 1rem; }
+
+    .card-footer {
+      border-top: 1px dashed var(--cream-deep);
+      padding: 12px 16px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      background: var(--gold);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: background 0.15s ease;
+    }
+
+    .download-btn:hover { background: var(--gold-dark); }
+
+    .download-count {
+      background: rgba(255,255,255,0.25);
+      padding: 1px 8px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    /* ========== FOOTER ========== */
+    .site-footer {
+      text-align: center;
+      padding: 24px 20px;
+      font-size: 0.85rem;
+      color: var(--ink-soft);
+      border-top: 1px solid var(--cream-deep);
+      margin-top: 30px;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 600px) {
+      .site-title { font-size: 1.5rem; }
+      .filter-btn { font-size: 0.88rem; padding: 6px 12px; }
+      .grid { grid-template-columns: 1fr; gap: 14px; }
+      main { padding: 16px; }
+      .card-title { font-size: 1.05rem; }
+    }
+
+    /* ========== LOADER ========== */
+    .loader {
+      text-align: center;
+      padding: 50px;
+      color: var(--ink-soft);
+    }
+
+    .loader-spinner {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--cream-deep);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-top">
+      <h1 class="site-title">บุญนิวส์</h1>
+      <p class="site-tagline">ข่าวงานบุญและกิจกรรมวัด</p>
+    </div>
+    <div class="filters">
+      <div class="filter-row" id="cat-filters" role="tablist" aria-label="หมวดหมู่">
+        <button class="filter-btn active" data-cat="all">ทั้งหมด</button>
+        <button class="filter-btn" data-cat="งานบุญ">งานบุญ</button>
+        <button class="filter-btn" data-cat="ทำบุญ">ทำบุญ</button>
+        <button class="filter-btn" data-cat="เทศกาล">เทศกาล</button>
+        <button class="filter-btn" data-cat="งานอบรม">งานอบรม</button>
+        <button class="filter-btn" data-cat="ต่างประเทศ">ต่างประเทศ</button>
+        <button class="filter-btn" data-cat="ศูนย์สาขา">ศูนย์สาขา</button>
+      </div>
+      <div class="filter-row" id="time-filters" role="tablist" aria-label="ช่วงเวลา">
+        <button class="filter-btn active" data-time="all">ทั้งหมด</button>
+        <button class="filter-btn" data-time="week">อาทิตย์นี้</button>
+        <button class="filter-btn" data-time="month">เดือนนี้</button>
+        <button class="filter-btn" data-time="important">สำคัญ</button>
+        <button class="filter-btn" data-time="nearest">ใกล้ที่สุด</button>
+        <button class="filter-btn" data-time="farthest">ไกลที่สุด</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="result-info" id="result-info"></div>
+    <div id="event-list" class="grid">
+      <div class="loader">
+        <div class="loader-spinner"></div>
+        <p style="margin-top: 12px;">กำลังโหลดข้อมูล...</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>บุญนิวส์ — รวมข่าวงานบุญและกิจกรรมของวัด</p>
+    <p style="margin-top: 4px; opacity: 0.7;">© <span id="year"></span></p>
+  </footer>
+
+  <script>
+    const THAI_MONTHS = [
+      'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+      'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    ];
+
+    const state = {
+      events: [],
+      activeCat: 'all',
+      activeTime: 'all',
+    };
+
+    function toDate(str) {
+      const [y, m, d] = str.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+
+    function todayMidnight() {
+      const t = new Date();
+      t.setHours(0, 0, 0, 0);
+      return t;
+    }
+
+    function daysUntil(dateStr) {
+      const today = todayMidnight();
+      const target = toDate(dateStr);
+      target.setHours(0, 0, 0, 0);
+      return Math.round((target - today) / 86400000);
+    }
+
+    function countdownLabel(dateStr) {
+      const d = daysUntil(dateStr);
+      if (d < 0) return null;
+      if (d === 0) return { text: 'วันนี้', cls: 'today' };
+      if (d === 1) return { text: 'พรุ่งนี้', cls: 'soon' };
+      if (d <= 7) return { text: `อีก ${d} วัน`, cls: 'soon' };
+      return { text: `อีก ${d} วัน`, cls: '' };
+    }
+
+    function escapeHTML(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
+
+    function isThisWeek(dateStr) {
+      const d = daysUntil(dateStr);
+      return d >= 0 && d <= 7;
+    }
+
+    function isThisMonth(dateStr) {
+      const today = todayMidnight();
+      const target = toDate(dateStr);
+      return target.getFullYear() === today.getFullYear()
+          && target.getMonth() === today.getMonth();
+    }
+
+    function filterAndSort() {
+      const today = todayMidnight();
+      let list = state.events.filter(ev => toDate(ev.date) >= today);
+
+      if (state.activeCat !== 'all') {
+        list = list.filter(ev => ev.categories.includes(state.activeCat));
+      }
+
+      if (state.activeTime === 'week') {
+        list = list.filter(ev => isThisWeek(ev.date));
+      } else if (state.activeTime === 'month') {
+        list = list.filter(ev => isThisMonth(ev.date));
+      } else if (state.activeTime === 'important') {
+        list = list.filter(ev => ev.important === true);
+      }
+
+      const dir = state.activeTime === 'farthest' ? -1 : 1;
+      list.sort((a, b) => dir * (toDate(a.date) - toDate(b.date)));
+
+      return list;
+    }
+
+    function renderCard(ev) {
+      const primary = ev.categories[0];
+      const rest = ev.categories.slice(1);
+      const moreCount = rest.length;
+      const cd = countdownLabel(ev.date);
+
+      const cdHTML = cd
+        ? `<span class="countdown ${cd.cls}">${cd.cls === 'today' ? '' : '⚡'} ${escapeHTML(cd.text)}</span>`
+        : '';
+
+      const importantHTML = ev.important
+        ? `<span class="badge-important">★ สำคัญ</span>`
+        : '';
+
+      const moreHTML = moreCount > 0
+        ? `<button class="tag-more" type="button" aria-label="ดูหมวดที่เหลือ" data-more='${escapeHTML(JSON.stringify(rest))}'>+${moreCount}<span class="tag-popup">${rest.map(escapeHTML).join(' · ')}</span></button>`
+        : '';
+
+      const contactHTML = ev.contact
+        ? `<div class="meta-row"><span class="icon">📞</span><span>${escapeHTML(ev.contact)}</span></div>`
+        : '';
+
+      const cardFile = ev.cards && ev.cards[0];
+      const downloadCount = (ev.card_count || (ev.cards ? ev.cards.length : 0));
+      const countBadge = downloadCount > 1
+        ? `<span class="download-count">${downloadCount}+</span>`
+        : `<span class="download-count">${downloadCount}</span>`;
+
+      const downloadHTML = cardFile
+        ? `<a class="download-btn" href="cards/${encodeURIComponent(cardFile)}" download="${escapeHTML(cardFile)}">⬇ ดาวน์โหลดการ์ด ${countBadge}</a>`
+        : '';
+
+      return `
+        <article class="card">
+          <div class="card-top">
+            <span class="tag">${escapeHTML(primary)}</span>
+            ${moreHTML}
+            ${importantHTML}
+            ${cdHTML}
+          </div>
+          <div class="card-body">
+            <div class="card-temple">🏯 ${escapeHTML(ev.temple)}</div>
+            <div class="card-title">${escapeHTML(ev.title)}</div>
+            <div class="meta-row"><span class="icon">📅</span><span>${escapeHTML(ev.date_display)}</span></div>
+            ${contactHTML}
+          </div>
+          ${downloadHTML ? `<div class="card-footer">${downloadHTML}</div>` : ''}
+        </article>
+      `;
+    }
+
+    function render() {
+      const list = filterAndSort();
+      const root = document.getElementById('event-list');
+      const info = document.getElementById('result-info');
+
+      if (list.length === 0) {
+        info.innerHTML = '';
+        root.innerHTML = `
+          <div class="empty" style="grid-column: 1 / -1;">
+            <div class="empty-icon">🪷</div>
+            <p>ยังไม่มีงานบุญในหมวดที่เลือก</p>
+            <p style="font-size: 0.85rem; margin-top: 6px;">ลองเลือกหมวดอื่นหรือช่วงเวลาอื่น</p>
+          </div>
+        `;
+        return;
+      }
+
+      info.innerHTML = `พบ <strong>${list.length}</strong> กิจกรรม`;
+      root.innerHTML = list.map(renderCard).join('');
+    }
+
+    function bindFilters() {
+      document.getElementById('cat-filters').addEventListener('click', (e) => {
+        const btn = e.target.closest('.filter-btn');
+        if (!btn) return;
+        document.querySelectorAll('#cat-filters .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.activeCat = btn.dataset.cat;
+        render();
+      });
+
+      document.getElementById('time-filters').addEventListener('click', (e) => {
+        const btn = e.target.closest('.filter-btn');
+        if (!btn) return;
+        document.querySelectorAll('#time-filters .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.activeTime = btn.dataset.time;
+        render();
+      });
+
+      document.addEventListener('click', (e) => {
+        const more = e.target.closest('.tag-more');
+        document.querySelectorAll('.tag-popup.show').forEach(p => {
+          if (!more || !more.contains(p)) p.classList.remove('show');
+        });
+        if (more) {
+          const popup = more.querySelector('.tag-popup');
+          if (popup) popup.classList.toggle('show');
+        }
+      });
+    }
+
+    async function init() {
+      document.getElementById('year').textContent = new Date().getFullYear() + 543;
+      bindFilters();
+      try {
+        const res = await fetch('events.json', { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        state.events = await res.json();
+      } catch (err) {
+        console.error(err);
+        document.getElementById('event-list').innerHTML = `
+          <div class="empty" style="grid-column: 1 / -1;">
+            <div class="empty-icon">⚠️</div>
+            <p>ไม่สามารถโหลดข้อมูลกิจกรรมได้</p>
+            <p style="font-size: 0.85rem; margin-top: 6px;">${escapeHTML(err.message)}</p>
+          </div>
+        `;
+        return;
+      }
+      render();
+    }
+
+    init();
+  </script>
+</body>
+</html>
