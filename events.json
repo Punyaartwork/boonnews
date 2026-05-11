@@ -5,10 +5,16 @@
     "title": "พิธีทอดผ้าป่าวันวิสาขบูชา",
     "date": "2026-05-22",
     "date_display": "วันที่ 22 พฤษภาคม 2569",
-    "categories": ["ทำบุญ", "เทศกาล", "งานบุญ"],
+    "categories": [
+      "ทำบุญ",
+      "เทศกาล",
+      "งานบุญ"
+    ],
     "important": true,
     "contact": "02-395-0098",
-    "cards": ["2026-05-22_dhammakaya_01.jpg"],
+    "cards": [
+      "2026-05-22_dhammakaya_01.jpg"
+    ],
     "card_count": 1
   },
   {
@@ -17,10 +23,15 @@
     "title": "อบรมปฏิบัติธรรมประจำเดือนมิถุนายน",
     "date": "2026-06-14",
     "date_display": "วันที่ 14 มิถุนายน 2569",
-    "categories": ["งานอบรม", "ทำบุญ"],
+    "categories": [
+      "งานอบรม",
+      "ทำบุญ"
+    ],
     "important": false,
     "contact": "02-223-3331",
-    "cards": ["2026-06-14_sraket_01.jpg"],
+    "cards": [
+      "2026-06-14_sraket_01.jpg"
+    ],
     "card_count": 1
   },
   {
@@ -29,10 +40,36 @@
     "title": "พิธีอาสาฬหบูชาและเข้าพรรษา ณ พุทธคยา",
     "date": "2026-07-29",
     "date_display": "วันที่ 29 กรกฎาคม 2569",
-    "categories": ["เทศกาล", "ต่างประเทศ", "งานบุญ"],
+    "categories": [
+      "เทศกาล",
+      "ต่างประเทศ",
+      "งานบุญ"
+    ],
     "important": true,
     "contact": "info@watthaibuddhagaya.org",
-    "cards": ["2026-07-29_watthaibuddhagaya_01.jpg"],
+    "cards": [
+      "2026-07-29_watthaibuddhagaya_01.jpg"
+    ],
     "card_count": 1
+  },
+  {
+    "temple": "วัดพระธรรมกาย",
+    "title": "พิธีร่วมบุญการศึกษาพระภิกษุ สามเณร",
+    "date": "2026-05-17",
+    "date_display": "วันที่ 17 พฤษภาคม 2569",
+    "categories": [
+      "ทำบุญ",
+      "งานบุญ"
+    ],
+    "important": false,
+    "contact": "0 2831 1000",
+    "id": 4,
+    "cards": [
+      "2026-05-17_dhammakaya_01.jpg",
+      "2026-05-17_dhammakaya_02.jpg",
+      "2026-05-17_dhammakaya_03.jpg",
+      "2026-05-17_dhammakaya_04.jpg"
+    ],
+    "card_count": 4
   }
 ]
