@@ -15,15 +15,23 @@ Required:
     BOONNEWS_VPS_PATH   Remote repo path (e.g. /var/www/boonnews)
 
 Optional:
-    BOONNEWS_VPS_PORT   SSH port (default 22)
-    BOONNEWS_VPS_URL    Site URL printed on success
-    BOONNEWS_VPS_BRANCH Git branch to pull (default main)
+    BOONNEWS_VPS_PORT              SSH port (default 22)
+    BOONNEWS_VPS_URL               Site URL printed on success
+    BOONNEWS_VPS_BRANCH            Git branch to pull (default main)
+    BOONNEWS_VPS_KEYCHAIN_SERVICE  macOS Keychain service name (e.g. "boonnews-vps")
+                                   When set, deploy retrieves the password via
+                                   `security find-generic-password -s <SERVICE> -a <USER>`
+                                   and pipes it to `sshpass` for non-interactive auth.
 
-Assumes SSH key auth — `BatchMode=yes` prevents password prompts.
+Authentication options (in priority order):
+    1. macOS Keychain (set BOONNEWS_VPS_KEYCHAIN_SERVICE) — fully automated, requires `sshpass`
+    2. SSH key (no extra config) — silent if key auth works
+    3. Interactive password prompt (fallback) — works as long as a TTY is attached
 """
 
 import argparse
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -55,6 +63,24 @@ def resolve(arg_val, env_key: str, file_env: dict, default=None):
     return default
 
 
+def get_keychain_password(service: str, account: str) -> str | None:
+    """Get password from macOS Keychain via `security`. Returns None on failure."""
+    if sys.platform != "darwin":
+        return None
+    try:
+        result = subprocess.run(
+            ["security", "find-generic-password", "-s", service, "-a", account, "-w"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode == 0:
+            return result.stdout.rstrip("\n")
+    except Exception as exc:
+        print(f"  WARN: keychain lookup failed: {exc}", file=sys.stderr)
+    return None
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Deploy boonnews to VPS")
     parser.add_argument("--host", help="VPS hostname or IP")
@@ -72,6 +98,10 @@ def main() -> int:
         "--batch",
         action="store_true",
         help="Fail fast on auth prompts (set BOONNEWS_VPS_BATCH=true to default-on)",
+    )
+    parser.add_argument(
+        "--keychain-service",
+        help="macOS Keychain service name. Overrides BOONNEWS_VPS_KEYCHAIN_SERVICE.",
     )
     args = parser.parse_args()
 
@@ -113,8 +143,38 @@ def main() -> int:
         in ("1", "true", "yes")
     )
 
-    ssh_cmd = ["ssh", "-p", str(port), "-o", "StrictHostKeyChecking=accept-new"]
-    if batch_mode:
+    # Try Keychain → sshpass for fully-automated password auth
+    keychain_service = resolve(args.keychain_service, "BOONNEWS_VPS_KEYCHAIN_SERVICE", file_env)
+    password = None
+    env = os.environ.copy()
+    if keychain_service:
+        password = get_keychain_password(keychain_service, user)
+        if password is None:
+            print(
+                f"  WARN: keychain entry not found "
+                f"(service={keychain_service!r}, account={user!r}) — falling back to interactive ssh.\n"
+                f"  Add it: security add-generic-password -s {keychain_service} -a {user} -w '<password>'",
+                file=sys.stderr,
+            )
+        elif shutil.which("sshpass") is None:
+            print(
+                "  WARN: keychain has the password but `sshpass` is not installed.\n"
+                "  Will try SSH key / interactive prompt instead.\n"
+                "  (To enable auto-auth: brew install hudochenkov/sshpass/sshpass)",
+                file=sys.stderr,
+            )
+            password = None  # disable sshpass path; fall through to normal ssh
+        else:
+            print(f"  using password from Keychain (service={keychain_service}, account={user})")
+            env["SSHPASS"] = password
+
+    ssh_cmd = []
+    if password and env.get("SSHPASS"):
+        ssh_cmd += ["sshpass", "-e"]
+
+    ssh_cmd += ["ssh", "-p", str(port), "-o", "StrictHostKeyChecking=accept-new"]
+    if batch_mode and not password:
+        # BatchMode disables password auth, so don't set it when using sshpass.
         ssh_cmd += ["-o", "BatchMode=yes"]
     ssh_cmd += [f"{user}@{host}", remote_cmd]
 
@@ -126,7 +186,7 @@ def main() -> int:
         return 0
 
     print()
-    result = subprocess.run(ssh_cmd)
+    result = subprocess.run(ssh_cmd, env=env)
     if result.returncode != 0:
         print(f"\n✗ Deploy failed (exit {result.returncode})", file=sys.stderr)
         print(
