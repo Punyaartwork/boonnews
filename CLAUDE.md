@@ -121,12 +121,12 @@ Claude ทำตามลำดับนี้:
 ## กฎห้ามทำ (Do NOT)
 
 1. **ห้าม commit ก่อนได้คำว่า "yes" จาก user เด็ดขาด** — แม้จะมั่นใจแค่ไหน
-2. **ห้ามแก้ `events.json` ด้วยมือ** — ใช้ `scripts/add_card.py` เท่านั้น (validation + auto id + git ops)
+2. **ห้ามแก้ `events.json` ด้วยมือเพื่อ "เพิ่ม" event** — ใช้ `scripts/add_card.py` เท่านั้น (validation + auto id + git ops) การลบ event ที่ผ่านไปแล้วทำมือได้ ดูข้อ 7
 3. **ห้ามใส่ category ที่ไม่อยู่ใน whitelist** — จะ fail validation
 4. **ห้ามใส่ พ.ศ. ใน field `date`** — เป็น ค.ศ. (YYYY-MM-DD) เสมอ
 5. **ห้ามใช้ framework / build tool** — pure HTML/CSS/JS เท่านั้น
 6. **ห้ามแก้รูปใน `cards/` ตรงๆ** — รูปต้อง rename ผ่าน script เท่านั้น
-7. **ห้ามลบ event เก่า** — เก็บไว้เป็น history (frontend กรอง date >= today เอง)
+7. **ลบ event ที่ผ่านไปแล้วได้** — ถ้า `event.date < today` (วันที่ปัจจุบัน YYYY-MM-DD) สามารถลบ entry ใน `events.json` + ไฟล์รูปใน `cards/` ออกได้เลย แล้ว commit + push + deploy ตามปกติ — frontend กรอง `date >= today` อยู่แล้วจึงลบหรือเก็บก็ได้ แต่การลบช่วยให้ repo เบาและไม่ต้อง download ข้อมูลที่ไม่ใช้ ห้ามลบ event ที่ยังไม่ถึง (อนาคต)
 8. **ห้าม push --force** — append-only model
 
 ## Conventions
