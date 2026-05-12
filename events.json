@@ -71,5 +71,21 @@
       "2026-05-30_chiangdao_02.jpg"
     ],
     "card_count": 2
+  },
+  {
+    "temple": "วัดพระธรรมกาย",
+    "title": "ธรรมทายาทหญิง รุ่นที่ 41 (ผู้หญิง 200%)",
+    "date": "2026-06-02",
+    "date_display": "วันที่ 2 มิถุนายน 2569",
+    "categories": [
+      "งานอบรม"
+    ],
+    "important": false,
+    "contact": "09-2712-2037, 09-6875-4114",
+    "id": 8,
+    "cards": [
+      "2026-06-02_thammathayatfemale41_01.jpg"
+    ],
+    "card_count": 1
   }
 ]
