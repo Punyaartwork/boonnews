@@ -120,5 +120,23 @@
       "2026-05-17_pattani82_01.jpg"
     ],
     "card_count": 1
+  },
+  {
+    "temple": "วัดพระธรรมกาย",
+    "title": "บรรพชาสามเณร โรงเรียนนานาชาติ รุ่นที่ 15",
+    "date": "2026-07-05",
+    "date_display": "วันที่ 5 กรกฎาคม 2569",
+    "categories": [
+      "ทำบุญ",
+      "งานบุญ",
+      "งานอบรม"
+    ],
+    "important": false,
+    "contact": "086-077-6000, www.tty072.com",
+    "id": 11,
+    "cards": [
+      "2026-07-05_samanenintl15_01.jpg"
+    ],
+    "card_count": 1
   }
 ]
