@@ -138,5 +138,24 @@
       "2026-07-05_samanenintl15_01.jpg"
     ],
     "card_count": 1
+  },
+  {
+    "temple": "วัดพระธรรมกาย",
+    "title": "อุปสมบทหมู่ธรรมทายาท ระดับอุดมศึกษา รุ่นที่ 53 (ภาคฤดูฝน)",
+    "date": "2026-06-01",
+    "date_display": "วันที่ 1 มิถุนายน 2569",
+    "categories": [
+      "ทำบุญ",
+      "งานบุญ",
+      "งานอบรม"
+    ],
+    "important": false,
+    "contact": "086-077-6000, www.tty072.com",
+    "id": 12,
+    "cards": [
+      "2026-06-01_thammathayat53_01.jpg",
+      "2026-06-01_thammathayat53_02.jpg"
+    ],
+    "card_count": 2
   }
 ]
