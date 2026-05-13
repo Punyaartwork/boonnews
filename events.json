@@ -241,5 +241,21 @@
       "2026-05-23_visakhaledprep_01.png"
     ],
     "card_count": 1
+  },
+  {
+    "temple": "วัดพระธรรมกาย",
+    "title": "บรรพชาอุปสมบทหมู่ ผู้บริหาร รุ่นที่ 16",
+    "date": "2026-06-03",
+    "date_display": "วันที่ 3 มิถุนายน 2569",
+    "categories": [
+      "งานอบรม"
+    ],
+    "important": false,
+    "contact": "086-795-3472, 083-559-9565",
+    "id": 18,
+    "cards": [
+      "2026-06-03_executive16_01.png"
+    ],
+    "card_count": 1
   }
 ]
