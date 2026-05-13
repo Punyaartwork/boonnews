@@ -225,5 +225,21 @@
       "2026-05-31_visakha69_01.jpg"
     ],
     "card_count": 1
+  },
+  {
+    "temple": "วัดพระธรรมกาย",
+    "title": "ขอเชิญใส่งานประทีป LED จุดประทีปแปรอักษร วันวิสาขบูชา (23-27 พ.ค.)",
+    "date": "2026-05-23",
+    "date_display": "วันที่ 23 พฤษภาคม 2569",
+    "categories": [
+      "งานบุญ"
+    ],
+    "important": false,
+    "contact": "",
+    "id": 17,
+    "cards": [
+      "2026-05-23_visakhaledprep_01.png"
+    ],
+    "card_count": 1
   }
 ]
