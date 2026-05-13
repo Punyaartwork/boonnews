@@ -10,20 +10,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --gold-dark: #8a6118;
-      --gold: #b8860b;
-      --gold-light: #d4a82a;
-      --gold-tint: #f5ecd2;
-      --brown: #5d3a2e;
-      --brown-light: #8b5a3c;
-      --cream: #fdfaf3;
-      --cream-deep: #f7eedb;
-      --ink: #2b1d12;
-      --ink-soft: #5e4a3a;
+      --bg: #ffffff;
+      --bg-soft: #f8f9fa;
+      --border: #e8eaed;
+      --border-soft: #f1f3f5;
+      --text: #1a1a1a;
+      --text-soft: #6b7280;
+      --text-mute: #9ca3af;
       --red: #c0392b;
-      --shadow: 0 4px 18px rgba(93, 58, 46, 0.08);
-      --shadow-hover: 0 8px 28px rgba(93, 58, 46, 0.16);
-      --radius: 14px;
+      --accent: #1a1a1a;
+      --accent-soft: #2b2b2b;
+      --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-hover: 0 4px 14px rgba(0,0,0,0.08);
+      --radius: 12px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,8 +31,8 @@
 
     body {
       font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--cream);
-      color: var(--ink);
+      background: var(--bg);
+      color: var(--text);
       line-height: 1.55;
       min-height: 100vh;
       display: flex;
@@ -47,86 +46,69 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: linear-gradient(180deg, #fffaee 0%, var(--cream-deep) 100%);
-      border-bottom: 3px solid var(--gold);
-      box-shadow: 0 2px 12px rgba(184, 134, 11, 0.12);
-    }
-
-    .header-top {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 16px 20px 8px;
-      text-align: center;
-    }
-
-    .site-title {
-      font-family: 'Noto Serif Thai', serif;
-      font-size: 1.85rem;
-      font-weight: 700;
-      color: var(--gold-dark);
-      letter-spacing: 1px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .site-title::before { content: "☸"; color: var(--gold); }
-    .site-title::after  { content: "☸"; color: var(--gold); }
-
-    .site-tagline {
-      font-size: 0.95rem;
-      color: var(--brown);
-      margin-top: 2px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
     }
 
     .filters {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 8px 20px 14px;
+      padding: 14px 20px;
     }
 
     .filter-row {
       display: flex;
       flex-wrap: nowrap;
-      gap: 6px;
+      gap: 8px;
       overflow-x: auto;
       overflow-y: hidden;
-      padding: 4px 0;
+      padding: 2px 0;
       scrollbar-width: thin;
       -webkit-overflow-scrolling: touch;
     }
 
     .filter-row::-webkit-scrollbar { height: 4px; }
-    .filter-row::-webkit-scrollbar-thumb { background: var(--gold-light); border-radius: 4px; }
+    .filter-row::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-    .filter-row + .filter-row { margin-top: 6px; }
+    .filter-row + .filter-row { margin-top: 8px; }
 
     .filter-btn {
       flex: 0 0 auto;
       font-family: inherit;
       font-size: 0.92rem;
       font-weight: 500;
-      padding: 7px 14px;
-      border: 1.5px solid var(--gold-light);
+      padding: 8px 16px;
+      border: 1px solid var(--border);
       border-radius: 999px;
-      background: #fff;
-      color: var(--brown);
+      background: var(--bg);
+      color: var(--text-soft);
       cursor: pointer;
       transition: all 0.15s ease;
       white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
 
     .filter-btn:hover {
-      border-color: var(--gold);
-      background: var(--gold-tint);
+      background: var(--bg-soft);
+      border-color: var(--text-mute);
     }
 
     .filter-btn.active {
-      background: var(--gold);
-      border-color: var(--gold-dark);
+      background: var(--accent);
+      border-color: var(--accent);
       color: #fff;
       font-weight: 600;
     }
+
+    .filter-btn .count {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-mute);
+    }
+
+    .filter-btn.active .count { color: rgba(255,255,255,0.7); }
 
     /* ========== MAIN ========== */
     main {
@@ -139,12 +121,12 @@
 
     .result-info {
       font-size: 0.92rem;
-      color: var(--ink-soft);
+      color: var(--text-soft);
       margin-bottom: 16px;
       text-align: center;
     }
 
-    .result-info strong { color: var(--gold-dark); font-weight: 600; }
+    .result-info strong { color: var(--text); font-weight: 600; }
 
     .grid {
       display: grid;
@@ -155,7 +137,7 @@
     .empty {
       text-align: center;
       padding: 50px 20px;
-      color: var(--ink-soft);
+      color: var(--text-soft);
     }
 
     .empty-icon {
@@ -166,9 +148,9 @@
 
     /* ========== CARD ========== */
     .card {
-      background: #fff;
+      background: var(--bg);
       border-radius: var(--radius);
-      border: 1px solid var(--cream-deep);
+      border: 1px solid var(--border);
       box-shadow: var(--shadow);
       overflow: hidden;
       display: flex;
@@ -195,9 +177,9 @@
       font-weight: 600;
       padding: 3px 10px;
       border-radius: 999px;
-      background: var(--gold-tint);
-      color: var(--gold-dark);
-      border: 1px solid var(--gold-light);
+      background: var(--bg-soft);
+      color: var(--text);
+      border: 1px solid var(--border);
       letter-spacing: 0.3px;
     }
 
@@ -207,20 +189,20 @@
       font-weight: 600;
       padding: 3px 8px;
       border-radius: 999px;
-      background: var(--brown-light);
+      background: var(--text-soft);
       color: #fff;
       border: none;
       cursor: pointer;
       font-family: inherit;
     }
 
-    .tag-more:hover { background: var(--brown); }
+    .tag-more:hover { background: var(--text); }
 
     .tag-popup {
       position: absolute;
       top: calc(100% + 6px);
       left: 0;
-      background: var(--ink);
+      background: var(--text);
       color: #fff;
       padding: 8px 12px;
       border-radius: 8px;
@@ -238,7 +220,7 @@
       top: -5px;
       left: 12px;
       border: 5px solid transparent;
-      border-bottom-color: var(--ink);
+      border-bottom-color: var(--text);
       border-top: 0;
     }
 
@@ -255,7 +237,7 @@
       margin-left: auto;
       font-size: 0.78rem;
       font-weight: 600;
-      color: var(--brown);
+      color: var(--text-soft);
       display: inline-flex;
       align-items: center;
       gap: 3px;
@@ -275,14 +257,14 @@
       font-family: 'Noto Serif Thai', serif;
       font-size: 1.05rem;
       font-weight: 700;
-      color: var(--gold-dark);
+      color: var(--text);
       margin-top: 4px;
     }
 
     .card-title {
       font-size: 1.1rem;
       font-weight: 600;
-      color: var(--ink);
+      color: var(--text);
       margin-top: 6px;
       line-height: 1.4;
     }
@@ -292,14 +274,14 @@
       align-items: center;
       gap: 6px;
       font-size: 0.93rem;
-      color: var(--ink-soft);
+      color: var(--text-soft);
       margin-top: 8px;
     }
 
     .meta-row .icon { font-size: 1rem; }
 
     .card-footer {
-      border-top: 1px dashed var(--cream-deep);
+      border-top: 1px solid var(--border-soft);
       padding: 12px 16px;
       display: flex;
       justify-content: center;
@@ -310,7 +292,7 @@
       align-items: center;
       gap: 8px;
       padding: 9px 18px;
-      background: var(--gold);
+      background: var(--accent);
       color: #fff;
       text-decoration: none;
       border-radius: 999px;
@@ -319,10 +301,10 @@
       transition: background 0.15s ease;
     }
 
-    .download-btn:hover { background: var(--gold-dark); }
+    .download-btn:hover { background: var(--accent-soft); }
 
     .download-count {
-      background: rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.2);
       padding: 1px 8px;
       border-radius: 999px;
       font-size: 0.82rem;
@@ -359,14 +341,14 @@
 
     .modal-content {
       position: relative;
-      background: var(--cream);
+      background: var(--bg);
       border-radius: 18px;
       width: min(720px, 100%);
       max-height: 88vh;
       overflow-y: auto;
       padding: 28px 24px 24px;
-      box-shadow: 0 24px 60px rgba(43, 29, 18, 0.35);
-      border: 2px solid var(--gold-light);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+      border: 1px solid var(--border);
       animation: modalSlideUp 0.22s cubic-bezier(0.2, 0.8, 0.3, 1);
     }
 
@@ -385,7 +367,7 @@
       background: transparent;
       font-size: 1.6rem;
       line-height: 1;
-      color: var(--brown);
+      color: var(--text-soft);
       cursor: pointer;
       border-radius: 50%;
       display: flex;
@@ -395,13 +377,13 @@
       transition: background 0.15s;
     }
 
-    .modal-close:hover { background: var(--cream-deep); }
+    .modal-close:hover { background: var(--bg-soft); }
 
     .modal-title {
       font-family: 'Noto Serif Thai', serif;
       font-size: 1.15rem;
       font-weight: 700;
-      color: var(--gold-dark);
+      color: var(--text);
       text-align: center;
       margin-bottom: 4px;
       padding-right: 30px;
@@ -409,7 +391,7 @@
 
     .modal-subtitle {
       font-size: 0.9rem;
-      color: var(--ink-soft);
+      color: var(--text-soft);
       text-align: center;
       margin-bottom: 18px;
     }
@@ -426,16 +408,16 @@
       text-decoration: none;
       border-radius: 12px;
       overflow: hidden;
-      border: 1.5px solid var(--cream-deep);
-      background: #fff;
+      border: 1px solid var(--border);
+      background: var(--bg);
       transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
     }
 
     .modal-card:hover,
     .modal-card:focus {
       transform: translateY(-3px);
-      border-color: var(--gold);
-      box-shadow: 0 8px 20px rgba(184, 134, 11, 0.18);
+      border-color: var(--text);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
       outline: none;
     }
 
@@ -443,7 +425,7 @@
       width: 100%;
       aspect-ratio: 1;
       object-fit: cover;
-      background: var(--cream-deep);
+      background: var(--bg-soft);
       display: block;
     }
 
@@ -451,10 +433,10 @@
       padding: 9px 8px;
       text-align: center;
       font-size: 0.88rem;
-      color: var(--brown);
+      color: var(--text);
       font-weight: 600;
-      background: #fff;
-      border-top: 1px solid var(--cream-deep);
+      background: var(--bg);
+      border-top: 1px solid var(--border-soft);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -472,8 +454,8 @@
       gap: 6px;
       padding: 8px 16px;
       background: transparent;
-      color: var(--brown);
-      border: 1.5px solid var(--gold-light);
+      color: var(--text-soft);
+      border: 1px solid var(--border);
       border-radius: 999px;
       font-size: 0.9rem;
       font-weight: 600;
@@ -483,8 +465,9 @@
     }
 
     .modal-all-btn:hover {
-      background: var(--gold-tint);
-      border-color: var(--gold);
+      background: var(--bg-soft);
+      border-color: var(--text-mute);
+      color: var(--text);
     }
 
     body.modal-open { overflow: hidden; }
@@ -500,15 +483,14 @@
       text-align: center;
       padding: 24px 20px;
       font-size: 0.85rem;
-      color: var(--ink-soft);
-      border-top: 1px solid var(--cream-deep);
+      color: var(--text-mute);
+      border-top: 1px solid var(--border-soft);
       margin-top: 30px;
     }
 
     /* ========== RESPONSIVE ========== */
     @media (max-width: 600px) {
-      .site-title { font-size: 1.5rem; }
-      .filter-btn { font-size: 0.88rem; padding: 6px 12px; }
+      .filter-btn { font-size: 0.88rem; padding: 7px 14px; }
       .grid { grid-template-columns: 1fr; gap: 14px; }
       main { padding: 16px; }
       .card-title { font-size: 1.05rem; }
@@ -518,15 +500,15 @@
     .loader {
       text-align: center;
       padding: 50px;
-      color: var(--ink-soft);
+      color: var(--text-soft);
     }
 
     .loader-spinner {
       display: inline-block;
       width: 32px;
       height: 32px;
-      border: 3px solid var(--cream-deep);
-      border-top-color: var(--gold);
+      border: 3px solid var(--border);
+      border-top-color: var(--text);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
@@ -536,19 +518,15 @@
 </head>
 <body>
   <header class="site-header">
-    <div class="header-top">
-      <h1 class="site-title">บุญนิวส์</h1>
-      <p class="site-tagline">ข่าวงานบุญและกิจกรรมวัด</p>
-    </div>
     <div class="filters">
       <div class="filter-row" id="cat-filters" role="tablist" aria-label="หมวดหมู่">
-        <button class="filter-btn active" data-cat="all">ทั้งหมด</button>
-        <button class="filter-btn" data-cat="งานบุญ">งานบุญ</button>
-        <button class="filter-btn" data-cat="ทำบุญ">ทำบุญ</button>
-        <button class="filter-btn" data-cat="เทศกาล">เทศกาล</button>
-        <button class="filter-btn" data-cat="งานอบรม">งานอบรม</button>
-        <button class="filter-btn" data-cat="ต่างประเทศ">ต่างประเทศ</button>
-        <button class="filter-btn" data-cat="ศูนย์สาขา">ศูนย์สาขา</button>
+        <button class="filter-btn active" data-cat="all">ทั้งหมด <span class="count"></span></button>
+        <button class="filter-btn" data-cat="งานบุญ">งานบุญ <span class="count"></span></button>
+        <button class="filter-btn" data-cat="ทำบุญ">ทำบุญ <span class="count"></span></button>
+        <button class="filter-btn" data-cat="เทศกาล">เทศกาล <span class="count"></span></button>
+        <button class="filter-btn" data-cat="งานอบรม">งานอบรม <span class="count"></span></button>
+        <button class="filter-btn" data-cat="ต่างประเทศ">ต่างประเทศ <span class="count"></span></button>
+        <button class="filter-btn" data-cat="ศูนย์สาขา">ศูนย์สาขา <span class="count"></span></button>
       </div>
       <div class="filter-row" id="time-filters" role="tablist" aria-label="ช่วงเวลา">
         <button class="filter-btn active" data-time="all">ทั้งหมด</button>
@@ -740,6 +718,19 @@
       root.innerHTML = list.map(renderCard).join('');
     }
 
+    function updateFilterCounts() {
+      const today = todayMidnight();
+      const upcoming = state.events.filter(ev => toDate(ev.date) >= today);
+      document.querySelectorAll('#cat-filters .filter-btn').forEach(btn => {
+        const cat = btn.dataset.cat;
+        const n = cat === 'all'
+          ? upcoming.length
+          : upcoming.filter(ev => ev.categories.includes(cat)).length;
+        const span = btn.querySelector('.count');
+        if (span) span.textContent = `(${n})`;
+      });
+    }
+
     function bindFilters() {
       document.getElementById('cat-filters').addEventListener('click', (e) => {
         const btn = e.target.closest('.filter-btn');
@@ -855,6 +846,7 @@
         `;
         return;
       }
+      updateFilterCounts();
       render();
     }
 
