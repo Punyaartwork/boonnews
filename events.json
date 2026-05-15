@@ -257,5 +257,22 @@
       "2026-06-03_executive16_01.png"
     ],
     "card_count": 1
+  },
+  {
+    "temple": "วัดพระธรรมกาย",
+    "title": "พิธีบุพเปตพลี ครั้งที่ 183",
+    "date": "2026-05-16",
+    "categories": [
+      "ทำบุญ",
+      "งานบุญ"
+    ],
+    "important": false,
+    "contact": "02-831-1000",
+    "id": 19,
+    "date_display": "วันที่ 16 พฤษภาคม 2569",
+    "cards": [
+      "2026-05-16_bupetapali_01.jpg"
+    ],
+    "card_count": 1
   }
 ]
