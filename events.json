@@ -362,5 +362,22 @@
       "2026-06-21_glunjai_01.jpg"
     ],
     "card_count": 1
+  },
+  {
+    "temple": "ณ Pai Meditation Center อำเภอปาย จังหวัดแม่ฮ่องสอน",
+    "title": "Mind Pai Meditation Retreat ปี 2569 (คอร์สนานาชาติ)",
+    "date": "2026-06-13",
+    "date_display": "วันที่ 13-20 มิถุนายน 2569 (รุ่น #35)",
+    "categories": [
+      "งานอบรม",
+      "ต่างประเทศ"
+    ],
+    "important": false,
+    "contact": "+66-91-119-1892, www.paimeditationcenter.org",
+    "id": 25,
+    "cards": [
+      "2026-06-13_mindpai_01.jpg"
+    ],
+    "card_count": 1
   }
 ]
