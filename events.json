@@ -312,5 +312,22 @@
       "2026-06-14_dhammachai82_01.jpg"
     ],
     "card_count": 1
+  },
+  {
+    "temple": "วัดพระธรรมกาย",
+    "title": "พิธีบรรพชาอุปสมบท (พิธีบวช 30-31 พ.ค. 2569)",
+    "date": "2026-05-30",
+    "date_display": "วันที่ 30-31 พฤษภาคม 2569",
+    "categories": [
+      "ทำบุญ",
+      "งานบุญ"
+    ],
+    "important": false,
+    "contact": "",
+    "id": 22,
+    "cards": [
+      "2026-05-30_ordination_01.jpg"
+    ],
+    "card_count": 1
   }
 ]
