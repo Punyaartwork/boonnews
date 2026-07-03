@@ -8,7 +8,10 @@
 boonnews/
 ├── index.html              # หน้าแรก: กริดความเคลื่อนไหวทุกวัด (จาก centers.json)
 ├── map.html                # แผนที่เครือข่ายวัด ไทย/รอบโลก (จาก centers.json)
+├── analysis.html           # หน้าวิเคราะห์คลังข่าว 4 ปี (จาก analysis.json + calendar.json)
 ├── centers.json            # ฐานข้อมูลศูนย์ 253 แห่ง (generate — ห้ามแก้มือ)
+├── analysis.json           # สถิติข่าว 4 ปี: 251 แหล่ง, รายเดือน, quadrant (generate — ห้ามแก้มือ)
+├── calendar.json           # ฤดูกาลงานบุญ 16 งาน × 12 เดือน จากพาดหัวจริง (generate — ห้ามแก้มือ)
 ├── events.html             # หน้าข่าวงานบุญ/กิจกรรมวัด (เดิมคือ index.html — workflow /add ชี้หน้านี้)
 ├── events.json             # ฐานข้อมูลกิจกรรมทั้งหมด (ของ events.html)
 ├── cards/                  # รูปการ์ดทั้งหมด (track ใน git)
@@ -16,13 +19,47 @@ boonnews/
 ├── scripts/
 │   ├── add_card.py         # validate + commit + push
 │   ├── deploy.py           # ssh + git pull บน VPS
-│   └── build_centers_json.py  # สร้าง centers.json จาก ~/Documents/boonnews_work/data
+│   ├── build_centers_json.py   # สร้าง centers.json
+│   ├── build_analysis_json.py  # สร้าง analysis.json (ต้องมี openpyxl)
+│   └── build_calendar_json.py  # สร้าง calendar.json (สแกน docx ~1,100 วัน ใช้เวลาราว 1 นาที)
 ├── .claude/commands/add.md # slash command /add
+├── .claude/launch.json     # config เปิด dev server (python3 -m http.server 8641) สำหรับ preview
 ├── .gitignore
 └── README.md
 ```
 
 หมายเหตุ: "หน้าเว็บหลัก" ของ workflow /add และ Frontend Logic ด้านล่าง หมายถึง `events.html`
+
+## หน้า BOON NEWS (แผนที่/กริด/วิเคราะห์) + Data Pipeline
+
+ทุกหน้ามีเมนู 4 แท็บบน header เชื่อมกัน: ▦ แผนที่ / ▤ กริด / ▣ ข่าวงานบุญ / ▨ วิเคราะห์
+ดีไซน์มาจาก Claude Design (BoonnewsWorld handoff) — ธีม IBM Plex Sans Thai + Space Mono, navy `#15276B`, ส้ม `#F5821F`
+
+### แหล่งข้อมูลจริงอยู่นอก repo ที่ `~/Documents/boonnews_work/`
+
+| ไฟล์ generate | สคริปต์ | แหล่งข้อมูล |
+|---|---|---|
+| `centers.json` | `build_centers_json.py` | `data/all_centers_profiles_v2.csv` (253 ศูนย์ + FB) + `data/boonnews_catalog_newest4000.csv` (จับคู่คลิป — logic เดียวกับ video_matches) + ชื่ออังกฤษจาก `data/intl_centers.py` |
+| `analysis.json` | `build_analysis_json.py` | `รวมบทความ/สรุปข่าวรายวัด_2565-2568.xlsx` (251 แหล่ง, รายเดือน Top60) + profiles_v2 (quadrant A70/B16/C116/D51) |
+| `calendar.json` | `build_calendar_json.py` | `รวมบทความ/บทข่าวปี 25XX/<เดือน>/<DDMMYY>/*.docx` — สแกนบทหลัก BOON NEWS วันละไฟล์ (แก้ไข > ปกติ > เหลือง, ข้ามไฟล์เบรก/temp) สกัดพาดหัวในวงเล็บ |
+
+### เมื่อข้อมูลใน boonnews_work อัปเดต
+
+```bash
+python3 scripts/build_centers_json.py     # และ/หรือ build_analysis_json.py, build_calendar_json.py
+git add -A && git commit && git push      # commit เฉพาะเมื่อ user สั่ง
+python3 scripts/deploy.py                 # deploy เฉพาะเมื่อ user สั่ง
+```
+
+### กฎเฉพาะส่วนนี้
+
+- **ห้ามแก้ `centers.json` / `analysis.json` / `calendar.json` ด้วยมือ** — แก้ที่สคริปต์หรือแหล่งข้อมูลแล้ว generate ใหม่
+- แผนที่ใช้ d3 + topojson จาก CDN (แค่ projection ไม่มี build step) · โหลด world-atlas 110m + provinces.geojson จาก CDN
+- จังหวัดจับคู่ด้วยชื่อไทย `pro_th` ตรงตัว (77 จังหวัดตรงกับทะเบียน 100%)
+- ประเทศที่ไม่มี outline ใน atlas 110m (สิงคโปร์/มอลตา/บาห์เรน) ปักหมุดจากพิกัด lonlat ใน `COUNTRY_INFO` และคลิกแล้วเปิด panel แทนการซูม
+- ตำแหน่งหมุดศูนย์ตอนซูมเข้าประเทศเป็นตำแหน่งจำลองในเขตแดน (ยังไม่มี lat/lng รายศูนย์ — รอ Phase 2 Geocode)
+- "เรื่องเล่า" ในหน้า temple ยังเป็น placeholder (ยังไม่มีข้อมูล Story)
+- ข้อมูลที่รู้ว่าไม่ครบ: บทข่าว ธ.ค.66 และ เม.ย.–พ.ค.68 ไม่มีในเซิร์ฟเวอร์ (แสดงเป็นแถบลายในกราฟ) · ตัวเลขปี 2568 ช่วงปลายปียังไม่ครบ
 
 ## Schema ของ events.json
 
