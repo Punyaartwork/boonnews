@@ -118,6 +118,28 @@
   table.list .fb-a { color: #2563EB; text-decoration: none; font-size: 12px; }
   table.list .muted { color: #6B7393; }
 
+  /* Heatmap ฤดูกาลงานบุญ */
+  .hm-scroll { overflow-x: auto; }
+  .hm { min-width: 860px; }
+  .hm-row { display: flex; align-items: center; gap: 3px; padding: 3px 0; }
+  .hm-row .nm { width: 200px; flex-shrink: 0; font-size: 12.5px; color: #1B2348; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hm-row .cell { flex: 1; height: 26px; border-radius: 5px; background: #F2F5FC; position: relative; }
+  .hm-row .cell.peak { outline: 2px solid #15276B; outline-offset: -2px; }
+  .hm-row .cell .v { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Space Mono', monospace; font-size: 10px; color: rgba(27,35,72,0.55); }
+  .hm-row .cell.hi .v { color: #fff; font-weight: 700; }
+  .hm-row .stat { width: 120px; flex-shrink: 0; text-align: right; font-family: 'Space Mono', monospace; font-size: 10.5px; color: #6B7393; white-space: nowrap; }
+  .hm-row .stat .hit { display: inline-block; border-radius: 12px; padding: 2px 8px; margin-left: 6px; font-weight: 700; }
+  .hit.h4 { background: rgba(31,138,91,0.12); color: #1F8A5B; }
+  .hit.h3 { background: rgba(245,130,31,0.14); color: #C4650F; }
+  .hit.h2 { background: #EEF1F8; color: #97A0BC; }
+  .hm-head { display: flex; gap: 3px; padding: 0 0 8px; }
+  .hm-head .nm { width: 200px; flex-shrink: 0; }
+  .hm-head .cell { flex: 1; text-align: center; font-family: 'Space Mono', monospace; font-size: 10.5px; color: #97A0BC; background: none; height: auto; }
+  .hm-head .stat { width: 120px; flex-shrink: 0; }
+  .hm-legend { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 16px; font-size: 12px; color: #6B7393; align-items: center; }
+  .hm-legend .it { display: inline-flex; align-items: center; gap: 7px; }
+  .hm-legend .sw { width: 12px; height: 12px; border-radius: 3px; }
+
   /* ปฏิทิน */
   .cal { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
   .cal-cell { background: #fff; border: 1px solid #E4E8F3; border-radius: 14px; padding: 15px 17px; }
@@ -280,9 +302,21 @@
   <!-- ===== ปฏิทินงานบุญ ===== -->
   <div class="sec">
     <div class="sec-head">
-      <h2>ปฏิทินงานบุญประจำปี — ยืนยันจาก 4 ปีซ้อน ทำนายได้ 100%</h2>
-      <span class="sec-note">ใช้วางแผนคอนเทนต์ดักหน้าวาระได้ทั้งปี</span>
+      <h2>ปฏิทินงานบุญประจำปี — ยืนยันจาก 4 ปีซ้อน</h2>
+      <span class="sec-note" id="hmNote">นับจากพาดหัวจริงในบทข่าว 2565–2568</span>
     </div>
+    <div class="card" style="margin-bottom: 14px;">
+      <div id="hmSummary" style="font-size: 14px; font-weight: 600; color: #15276B; margin-bottom: 14px;"></div>
+      <div class="hm-scroll"><div class="hm" id="heatmap"></div></div>
+      <div class="hm-legend">
+        <span class="it"><span class="sw" style="background: rgba(245,130,31,0.12);"></span> น้อย</span>
+        <span class="it"><span class="sw" style="background: rgba(245,130,31,0.55);"></span> ปานกลาง</span>
+        <span class="it"><span class="sw" style="background: #F5821F;"></span> มาก (เทียบในแถวเดียวกัน)</span>
+        <span class="it"><span class="sw" style="background: #F2F5FC; outline: 2px solid #15276B; outline-offset: -2px;"></span> เดือนพีคของงานนั้น</span>
+        <span class="it">ป้ายขวา = พาดหัวรวม 4 ปี · พีคเดือนเดิมกี่ปีจาก 4 ปี — ชี้เมาส์ที่ช่องเพื่อดูแยกรายปี + ตัวอย่างพาดหัว</span>
+      </div>
+    </div>
+    <div class="sec-note" style="margin-bottom: 10px;">โน้ตบรรณาธิการรายเดือน — วาระที่เกิดซ้ำทุกปี ใช้วางแผนคอนเทนต์ดักหน้าได้ทั้งปี</div>
     <div class="cal">
       <div class="cal-cell"><div class="m">ม.ค.</div><div class="tx">ธรรมยาตรา (ปีที่ 13→14, พระ ~1,140 รูป) · วาระคุณยายอาจารย์ · วันเด็ก</div></div>
       <div class="cal-cell"><div class="m">ก.พ.</div><div class="tx">วันมหาปูชนียาจารย์ (3 ก.พ.) · มาฆบูชา · World-PEC / มอบโล่ทางก้าวหน้า</div></div>
@@ -478,6 +512,43 @@
     });
   }
 
+  // ---------- HEATMAP ปฏิทินงานบุญ ----------
+  var MO = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+
+  function renderCalendar(cal) {
+    var host = document.getElementById('heatmap');
+    var html = '<div class="hm-head"><span class="nm"></span>' +
+      MO.map(function (m) { return '<span class="cell">' + m.slice(0, -1) + '</span>'; }).join('') +
+      '<span class="stat"></span></div>';
+
+    cal.events.forEach(function (e) {
+      var max = Math.max.apply(null, e.byMonth) || 1;
+      var cells = '';
+      e.byMonth.forEach(function (v, m) {
+        var ratio = v / max;
+        var bg = v === 0 ? '#F2F5FC' : (ratio >= 0.999 ? '#F5821F' : 'rgba(245,130,31,' + (0.10 + ratio * 0.75).toFixed(2) + ')');
+        var byY = e.byYear.map(function (y, i) { return '25' + (65 + i) + ': ' + y[m]; }).join(' · ');
+        var tip = MO[m] + ' รวม ' + v + ' พาดหัว (' + byY + ')';
+        if (e.samples[m]) tip += '\nตัวอย่าง: ' + e.samples[m];
+        cells += '<span class="cell' + (m === e.peakMonth ? ' peak' : '') + (ratio >= 0.55 ? ' hi' : '') + '" ' +
+          'style="background: ' + bg + ';" title="' + esc(tip) + '">' +
+          (v ? '<span class="v">' + v + '</span>' : '') + '</span>';
+      });
+      var hitCls = e.peakYearsHit >= 4 ? 'h4' : e.peakYearsHit === 3 ? 'h3' : 'h2';
+      html += '<div class="hm-row"><span class="nm" title="' + esc(e.name) + '">' + esc(e.name) + '</span>' + cells +
+        '<span class="stat">' + e.total.toLocaleString() +
+        '<span class="hit ' + hitCls + '">พีค' + MO[e.peakMonth].slice(0, -1) + ' ' + e.peakYearsHit + '/4ปี</span></span></div>';
+    });
+    host.innerHTML = html;
+
+    var stable = cal.events.filter(function (e) { return e.peakYearsHit >= 3; }).length;
+    document.getElementById('hmSummary').textContent =
+      stable + ' จาก ' + cal.events.length + ' งานบุญ เกิดเดือนพีคเดิม ≥3 ใน 4 ปี — ปฏิทินนี้ใช้ทำนายวาระล่วงหน้าได้จริง';
+    document.getElementById('hmNote').textContent =
+      'จากพาดหัว ' + cal.totalHeadlines.toLocaleString() + ' ชิ้น · บทรายการหลัก ' +
+      cal.daysScanned.reduce(function (a, b) { return a + b; }, 0).toLocaleString() + ' วัน (2565–2568)';
+  }
+
   // ---------- WIRE ----------
   document.querySelectorAll('#srcChips .chip').forEach(function (chip) {
     chip.addEventListener('click', function () {
@@ -503,6 +574,13 @@
     })
     .catch(function () {
       document.getElementById('mchart').innerHTML = '<div style="color: #97A0BC; font-size: 13px;">โหลด analysis.json ไม่สำเร็จ — รัน python3 scripts/build_analysis_json.py ก่อน</div>';
+    });
+
+  fetch('calendar.json')
+    .then(function (r) { return r.json(); })
+    .then(renderCalendar)
+    .catch(function () {
+      document.getElementById('heatmap').innerHTML = '<div style="color: #97A0BC; font-size: 13px;">โหลด calendar.json ไม่สำเร็จ — รัน python3 scripts/build_calendar_json.py ก่อน</div>';
     });
 })();
 </script>
