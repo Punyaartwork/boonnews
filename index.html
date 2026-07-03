@@ -1,1080 +1,221 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wat Events · ข่าวงานบุญและกิจกรรมวัด</title>
-  <meta name="description" content="รวมข่าวงานบุญ พิธีกรรม และกิจกรรมของวัด">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    /* ───────────────── TOKENS ───────────────── */
-    :root {
-      --accent: #E85D55;
-      --accent-soft: oklch(0.94 0.04 25);
-
-      --bg: #FAF8F5;
-      --surface: #ffffff;
-      --surface-2: #F3EFEA;
-      --border: rgba(20, 14, 8, 0.08);
-      --border-strong: rgba(20, 14, 8, 0.14);
-
-      --text: #1A1410;
-      --text-2: #5C544C;
-      --text-3: #8E867E;
-
-      --radius: 18px;
-      --radius-sm: 12px;
-      --radius-pill: 999px;
-
-      --shadow-card: 0 1px 0 rgba(20,14,8,0.04), 0 1px 2px rgba(20,14,8,0.04);
-      --shadow-elev: 0 8px 28px rgba(20,14,8,0.08);
-
-      --gap-card: 12px;
-      --pad-card: 22px;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { -webkit-text-size-adjust: 100%; }
-
-    body {
-      font-family: 'Inter', 'Sarabun', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      font-feature-settings: 'ss01', 'cv11';
-      line-height: 1.5;
-      min-height: 100vh;
-    }
-
-    a { color: inherit; text-decoration: none; }
-    button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
-
-    /* ───────────────── HEADER ───────────────── */
-    .site-header {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: rgba(250, 248, 245, 0.85);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .brand-row {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 16px 20px 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .brand { display: flex; align-items: center; gap: 12px; }
-
-    .brand-mark {
-      width: 38px; height: 38px;
-      border-radius: 11px;
-      background: var(--text);
-      color: #fff;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .brand-title {
-      font-family: 'Inter', sans-serif;
-      font-weight: 700;
-      font-size: 17px;
-      letter-spacing: -0.01em;
-    }
-
-    .brand-sub {
-      font-family: 'Sarabun', sans-serif;
-      font-size: 12px;
-      color: var(--text-3);
-      margin-top: 1px;
-    }
-
-    .brand-meta {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 2px;
-    }
-
-    .brand-meta-live {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      color: var(--accent);
-    }
-
-    .live-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--accent);
-      animation: livePulse 2s ease-out infinite;
-    }
-
-    @keyframes livePulse {
-      0%   { box-shadow: 0 0 0 0 rgba(232, 93, 85, 0.5); }
-      70%  { box-shadow: 0 0 0 8px rgba(232, 93, 85, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(232, 93, 85, 0); }
-    }
-
-    .brand-meta-count {
-      font-size: 11px;
-      color: var(--text-3);
-      font-variant-numeric: tabular-nums;
-    }
-
-    /* ───────────────── FILTERS ───────────────── */
-    .filters {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 4px 20px 14px;
-    }
-
-    .filter-row {
-      display: flex;
-      flex-wrap: nowrap;
-      gap: 6px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
-      padding: 2px 0;
-    }
-    .filter-row::-webkit-scrollbar { display: none; }
-
-    .filter-row-time { margin-top: 8px; }
-
-    .chip {
-      flex: 0 0 auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 12px 7px 13px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-pill);
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-2);
-      white-space: nowrap;
-      transition: all 0.15s ease;
-      line-height: 1;
-    }
-
-    .chip-en {
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      letter-spacing: -0.005em;
-    }
-
-    .chip-th {
-      font-family: 'Sarabun', sans-serif;
-      font-size: 12px;
-      color: var(--text-3);
-      font-weight: 500;
-    }
-
-    .chip-count {
-      font-family: 'Inter', sans-serif;
-      font-variant-numeric: tabular-nums;
-      font-size: 11px;
-      color: var(--text-3);
-      font-weight: 600;
-      padding-left: 6px;
-      border-left: 1px solid var(--border);
-      margin-left: 2px;
-    }
-
-    .chip:hover {
-      border-color: var(--border-strong);
-      background: var(--surface-2);
-    }
-
-    .chip-active {
-      background: var(--text);
-      border-color: var(--text);
-      color: #fff;
-    }
-    .chip-active .chip-th { color: rgba(255,255,255,0.7); }
-    .chip-active .chip-count { color: rgba(255,255,255,0.7); border-left-color: rgba(255,255,255,0.2); }
-
-    .time-chip {
-      flex: 0 0 auto;
-      padding: 6px 12px;
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-pill);
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-3);
-      white-space: nowrap;
-      transition: all 0.15s ease;
-      font-family: 'Inter', sans-serif;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .time-chip .th {
-      font-family: 'Sarabun', sans-serif;
-      font-size: 11px;
-    }
-    .time-chip:hover { color: var(--text-2); border-color: var(--border-strong); }
-    .time-chip-active {
-      background: var(--accent-soft);
-      border-color: transparent;
-      color: var(--accent);
-    }
-
-    /* ───────────────── MAIN ───────────────── */
-    main {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 22px 20px 60px;
-    }
-
-    .section-eyebrow {
-      font-family: 'Inter', sans-serif;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      color: var(--text-3);
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .section-count {
-      font-variant-numeric: tabular-nums;
-      margin-left: auto;
-      background: var(--surface-2);
-      color: var(--text-2);
-      padding: 2px 8px;
-      border-radius: 999px;
-      letter-spacing: 0;
-    }
-
-    .featured-section { margin-bottom: 28px; }
-
-    .list {
-      display: flex;
-      flex-direction: column;
-      gap: var(--gap-card);
-    }
-
-    /* ───────────────── CARD ───────────────── */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: var(--pad-card);
-      box-shadow: var(--shadow-card);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      transition: border-color 0.15s ease, box-shadow 0.18s ease, transform 0.15s ease;
-    }
-
-    .card:hover {
-      border-color: var(--border-strong);
-      box-shadow: var(--shadow-elev);
-      transform: translateY(-1px);
-    }
-
-    .card-featured {
-      background: var(--accent-soft);
-      border-color: transparent;
-      box-shadow: none;
-    }
-
-    .card-featured:hover {
-      filter: brightness(0.99);
-      transform: translateY(-1px);
-      border-color: transparent;
-      box-shadow: 0 12px 32px oklch(0.78 0.10 25 / 0.35);
-    }
-
-    .card-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .card-top-left { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 5px 12px;
-      background: var(--surface-2);
-      border-radius: var(--radius-pill);
-      font-family: 'Sarabun', sans-serif;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text);
-      line-height: 1.3;
-    }
-
-    .card-featured .pill { background: rgba(255,255,255,0.7); color: var(--text); }
-
-    .pill-more-wrap {
-      position: relative;
-      display: inline-flex;
-    }
-
-    .pill-more {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 9px;
-      background: var(--text);
-      color: #fff;
-      border-radius: var(--radius-pill);
-      font-family: 'Inter', sans-serif;
-      font-size: 11px;
-      font-weight: 700;
-      line-height: 1.3;
-      font-variant-numeric: tabular-nums;
-    }
-    .pill-more:hover { background: #000; }
-
-    .card-featured .pill-more { background: rgba(0,0,0,0.78); }
-
-    .pill-more-pop {
-      position: absolute;
-      top: calc(100% + 6px);
-      left: 0;
-      background: var(--text);
-      color: #fff;
-      padding: 7px 11px;
-      border-radius: 8px;
-      font-family: 'Sarabun', sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      white-space: nowrap;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.18);
-      z-index: 10;
-      display: none;
-    }
-    .pill-more-pop.show { display: block; }
-    .pill-more-pop::before {
-      content: "";
-      position: absolute;
-      top: -4px;
-      left: 12px;
-      border: 4px solid transparent;
-      border-bottom-color: var(--text);
-      border-top: 0;
-    }
-
-    .dot-important {
-      display: inline-block;
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--accent);
-      margin-left: 2px;
-    }
-
-    /* countdown */
-    .countdown {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-family: 'Sarabun', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-2);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .countdown svg { color: oklch(0.74 0.16 75); }
-
-    .countdown.soon { color: var(--accent); }
-    .countdown.soon svg { color: var(--accent); }
-
-    .countdown.today {
-      background: var(--accent);
-      color: #fff;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-    }
-    .countdown.today.on-coral { background: var(--text); }
-
-    .card-featured .countdown { color: rgba(0,0,0,0.72); }
-    .card-featured .countdown svg { color: oklch(0.55 0.18 60); }
-    .card-featured .countdown.soon { color: var(--text); }
-    .card-featured .countdown.soon svg { color: var(--text); }
-
-    /* temple line */
-    .card-temple {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 2px;
-    }
-
-    .temple-icon {
-      color: var(--text);
-      flex-shrink: 0;
-      opacity: 0.85;
-    }
-
-    .temple-name {
-      font-family: 'Sarabun', sans-serif;
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.005em;
-      line-height: 1.35;
-    }
-
-    .card-title {
-      font-family: 'Sarabun', sans-serif;
-      font-size: 18px;
-      line-height: 1.4;
-      font-weight: 600;
-      color: var(--text);
-      letter-spacing: -0.005em;
-      text-wrap: pretty;
-      margin-top: -2px;
-    }
-
-    .card-featured .card-title { font-weight: 700; }
-
-    /* meta */
-    .meta-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .meta-line {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-family: 'Sarabun', sans-serif;
-      font-size: 13.5px;
-      font-weight: 500;
-      color: var(--text-2);
-      line-height: 1.4;
-    }
-
-    .meta-icon { color: var(--text-3); flex-shrink: 0; }
-
-    .card-featured .meta-line { color: rgba(0,0,0,0.72); }
-    .card-featured .meta-icon { color: rgba(0,0,0,0.55); }
-
-    /* footer w/ centered download */
-    .card-footer {
-      display: flex;
-      justify-content: center;
-      margin-top: 6px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
-    }
-
-    .card-featured .card-footer { border-top-color: rgba(0,0,0,0.10); }
-
-    .download-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 20px;
-      background: var(--text);
-      color: #fff;
-      border-radius: var(--radius-pill);
-      font-family: 'Sarabun', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      transition: transform 0.12s ease, background 0.15s ease;
-    }
-
-    .download-btn .download-count {
-      background: rgba(255,255,255,0.2);
-      border-radius: 999px;
-      padding: 1px 8px;
-      font-family: 'Inter', sans-serif;
-      font-size: 11px;
-      font-weight: 700;
-      margin-left: 2px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .download-btn:hover { background: #000; transform: translateY(-1px); }
-    .download-btn:active { transform: translateY(0); }
-
-    /* empty */
-    .empty {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-3);
-    }
-    .empty-mark {
-      font-size: 48px;
-      color: var(--text-3);
-      opacity: 0.4;
-      margin-bottom: 10px;
-    }
-    .empty-sub { font-size: 12px; margin-top: 4px; opacity: 0.7; }
-
-    /* ───────────────── MODAL ───────────────── */
-    .modal[hidden] { display: none; }
-    .modal {
-      position: fixed;
-      inset: 0;
-      z-index: 200;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      animation: fadeIn 0.18s ease;
-    }
-    @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-
-    .modal-backdrop {
-      position: absolute;
-      inset: 0;
-      background: rgba(20, 14, 8, 0.55);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      cursor: pointer;
-    }
-
-    .modal-content {
-      position: relative;
-      background: var(--surface);
-      border-radius: 20px;
-      width: min(560px, 100%);
-      max-height: 88vh;
-      overflow-y: auto;
-      padding: 28px 26px 24px;
-      box-shadow: 0 32px 80px rgba(0,0,0,0.25);
-      animation: slideUp 0.22s cubic-bezier(0.2,0.8,0.3,1);
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(16px); opacity: 0 }
-      to   { transform: translateY(0); opacity: 1 }
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      line-height: 1;
-      color: var(--text-2);
-      transition: background 0.15s;
-    }
-    .modal-close:hover { background: var(--surface-2); }
-
-    .modal-eyebrow {
-      font-family: 'Inter', sans-serif;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      color: var(--text-3);
-      margin-bottom: 8px;
-    }
-
-    .modal-title {
-      font-family: 'Inter', 'Sarabun', sans-serif;
-      font-size: 17px;
-      font-weight: 700;
-      line-height: 1.3;
-      color: var(--text);
-      margin-bottom: 4px;
-      padding-right: 30px;
-    }
-
-    .modal-subtitle {
-      font-family: 'Sarabun', sans-serif;
-      font-size: 13px;
-      color: var(--text-3);
-      margin-bottom: 18px;
-    }
-
-    .modal-grid {
-      display: grid;
-      gap: 10px;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    }
-
-    .modal-card {
-      display: flex;
-      flex-direction: column;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      background: var(--surface);
-      transition: transform 0.15s, border-color 0.15s;
-    }
-
-    .modal-card:hover {
-      transform: translateY(-2px);
-      border-color: var(--border-strong);
-    }
-
-    .modal-card img {
-      width: 100%;
-      aspect-ratio: 1;
-      object-fit: cover;
-      background: var(--surface-2);
-      display: block;
-    }
-
-    .modal-card-label {
-      padding: 8px;
-      font-family: 'Inter', sans-serif;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-2);
-      text-align: center;
-      border-top: 1px solid var(--border);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-    }
-
-    /* ───────────────── FOOTER ───────────────── */
-    .site-footer {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 30px 20px 40px;
-      text-align: center;
-      font-family: 'Sarabun', sans-serif;
-      font-size: 12px;
-      color: var(--text-3);
-      border-top: 1px solid var(--border);
-    }
-    .footer-meta {
-      font-family: 'Inter', sans-serif;
-      font-size: 11px;
-      margin-top: 4px;
-      opacity: 0.8;
-    }
-
-    /* loader */
-    .loader {
-      text-align: center;
-      padding: 50px;
-      color: var(--text-3);
-    }
-    .loader-spinner {
-      display: inline-block;
-      width: 32px;
-      height: 32px;
-      border: 3px solid var(--border);
-      border-top-color: var(--text);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ───────────────── RESPONSIVE ───────────────── */
-    @media (max-width: 480px) {
-      .brand-meta-count { display: none; }
-      .card-title { font-size: 16px; }
-      .card-featured .card-title { font-size: 18px; }
-      main { padding: 18px 16px 50px; }
-      .brand-row, .filters { padding-left: 16px; padding-right: 16px; }
-      .modal-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOON NEWS · ฟีดความเคลื่อนไหวทุกวัด</title>
+<meta name="description" content="ฟีดความเคลื่อนไหวทุกวัดในเครือข่าย เรียงตามวันที่อัปเดต">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #EEF1F8; font-family: 'IBM Plex Sans Thai', sans-serif; color: #1B2348; min-height: 100vh; }
+  button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; padding: 0; }
+  input { font: inherit; outline: none; }
+  input::placeholder { color: #9AA2BF; }
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-thumb { background: #C7CEE0; border-radius: 6px; }
+
+  .mono { font-family: 'Space Mono', monospace; }
+
+  /* ===== APP BAR ===== */
+  .appbar { display: flex; align-items: center; gap: 22px; padding: 13px 28px; border-bottom: 1px solid #E4E8F3; background: rgba(255,255,255,0.94); backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 40; flex-wrap: wrap; }
+  .logo-link { display: flex; align-items: center; gap: 13px; text-decoration: none; }
+  .logo-stack { display: flex; flex-direction: column; gap: 3px; line-height: 1; }
+  .logo-boon { align-self: flex-start; background: linear-gradient(95deg, #FF9E33, #F5821F); padding: 2px 8px 3px; transform: skewX(-10deg); box-shadow: 0 2px 7px rgba(245,130,31,0.32); }
+  .logo-news { align-self: flex-start; margin-left: 6px; background: #15276B; padding: 2px 8px 3px; transform: skewX(-10deg); box-shadow: 0 2px 7px rgba(21,39,107,0.28); }
+  .logo-word { display: inline-block; transform: skewX(10deg); color: #fff; font-weight: 800; font-size: 15px; letter-spacing: 0.03em; }
+  .logo-sub { font-size: 13px; color: #6B7393; border-left: 1px solid #E4E8F3; padding-left: 13px; }
+  .seg { display: inline-flex; border: 1.5px solid #15276B; border-radius: 22px; overflow: hidden; font-size: 14px; font-weight: 600; }
+  .seg > * { padding: 7px 16px; white-space: nowrap; transition: all 0.15s ease; text-decoration: none; }
+  .seg-filter > * { padding: 7px 18px; }
+  .seg .on { background: #15276B; color: #fff; }
+  .seg .off { background: transparent; color: #15276B; }
+  .searchbox { display: flex; align-items: center; gap: 9px; border: 1.5px solid #E0E5F1; border-radius: 22px; padding: 7px 14px; background: #F4F6FB; min-width: 230px; }
+  .searchbox input { border: none; background: transparent; flex: 1; font-size: 14px; color: #1B2348; }
+
+  /* ===== PAGE HEAD ===== */
+  .page-head { max-width: 1240px; margin: 0 auto; padding: 30px 32px 8px; }
+  .page-eyebrow { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #F5821F; margin-bottom: 9px; }
+  .page-head-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  .page-head h1 { font-size: 33px; font-weight: 700; margin: 0; line-height: 1.12; color: #15276B; letter-spacing: -0.015em; }
+  .page-count { font-family: 'Space Mono', monospace; font-size: 12.5px; color: #6B7393; white-space: nowrap; }
+
+  /* ===== GRID ===== */
+  .grid-wrap { max-width: 1240px; margin: 0 auto; padding: 22px 32px 70px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+  .card { background: #fff; border: 1px solid #E4E8F3; border-radius: 16px; padding: 20px 21px 18px; display: flex; flex-direction: column; box-shadow: 0 6px 22px rgba(20,33,92,0.06); }
+  .card-top { display: flex; align-items: center; gap: 9px; margin-bottom: 13px; }
+  .act-pill { display: inline-flex; align-items: center; gap: 7px; border-radius: 20px; padding: 4px 11px; font-size: 11.5px; font-weight: 700; color: #fff; }
+  .act-pill .wdot { width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+  .card-scope { font-family: 'Space Mono', monospace; font-size: 10.5px; color: #B3BAD0; }
+  .card-name { font-size: 18px; font-weight: 700; line-height: 1.28; color: #15276B; letter-spacing: -0.01em; }
+  .card-place { font-size: 12.5px; color: #6B7393; margin-top: 4px; }
+  .card-act { margin-top: 15px; padding-top: 14px; border-top: 1px solid #EEF1F8; }
+  .card-act .lbl { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #97A0BC; margin-bottom: 5px; }
+  .card-act .tt { font-size: 14px; color: #1B2348; font-weight: 500; line-height: 1.42; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-date { margin-top: 13px; display: flex; align-items: center; gap: 8px; }
+  .card-date .ico { font-size: 13px; color: #F5821F; }
+  .card-date .tx { font-size: 13px; color: #3A4360; }
+  .card-date b { color: #1B2348; }
+  .card-spacer { flex: 1; min-height: 14px; }
+  .card-cta { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px; border: 1.5px solid #15276B; color: #15276B; border-radius: 24px; padding: 10px; font-size: 13.5px; font-weight: 600; text-decoration: none; transition: all 0.13s ease; }
+  .card-cta:hover { background: #15276B; color: #fff; }
+
+  .no-results { margin: 40px auto; max-width: 460px; padding: 36px; border: 1.5px dashed #C7CEE0; border-radius: 16px; text-align: center; background: #F7F9FD; }
+  .no-results .circle { width: 46px; height: 46px; border-radius: 50%; border: 1.5px dashed #A9B2CC; margin: 0 auto 12px; }
+  .no-results .tt { font-weight: 700; font-size: 16px; color: #15276B; margin-bottom: 5px; }
+  .no-results p { font-size: 13px; color: #6B7393; margin: 0; line-height: 1.55; }
+</style>
 </head>
 <body>
-  <header class="site-header">
-    <div class="brand-row">
-      <div class="brand">
-        <span class="brand-mark" aria-hidden="true">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2 L4 6 v6 c0 5 3.5 9 8 10 c4.5-1 8-5 8-10 V6 z"/>
-            <path d="M9 12 l2 2 4-4"/>
-          </svg>
-        </span>
-        <div class="brand-text">
-          <div class="brand-title">Wat Events</div>
-          <div class="brand-sub">ข่าวงานบุญและกิจกรรมวัด</div>
-        </div>
-      </div>
-      <div class="brand-meta">
-        <span class="brand-meta-live"><span class="live-dot"></span>LIVE</span>
-        <span class="brand-meta-count" id="upcoming-count"></span>
-      </div>
-    </div>
-    <div class="filters">
-      <div class="filter-row" id="cat-filters" role="tablist" aria-label="หมวดหมู่"></div>
-      <div class="filter-row filter-row-time" id="time-filters" role="tablist" aria-label="ช่วงเวลา"></div>
-    </div>
-  </header>
 
-  <main id="main-content">
-    <div class="loader">
-      <div class="loader-spinner"></div>
-      <p style="margin-top: 12px;">กำลังโหลดข้อมูล...</p>
-    </div>
-  </main>
+<!-- ===== APP BAR ===== -->
+<header class="appbar">
+  <a class="logo-link" href="./">
+    <span class="logo-stack">
+      <span class="logo-boon"><span class="logo-word">BOON</span></span>
+      <span class="logo-news"><span class="logo-word">NEWS</span></span>
+    </span>
+    <span class="logo-sub">ฟีดความเคลื่อนไหวทุกวัด</span>
+  </a>
 
-  <div class="modal" id="card-modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="modal-backdrop" data-close></div>
-    <div class="modal-content">
-      <button class="modal-close" type="button" data-close aria-label="ปิด">×</button>
-      <div class="modal-eyebrow">DOWNLOAD · ดาวน์โหลดการ์ด</div>
-      <h3 id="modal-title" class="modal-title"></h3>
-      <p class="modal-subtitle" id="modal-subtitle"></p>
-      <div class="modal-grid" id="modal-grid"></div>
-    </div>
+  <div class="seg">
+    <a class="off" href="map.html">▦ แผนที่</a>
+    <span class="on">▤ กริด</span>
+    <a class="off" href="events.html">▣ ข่าวงานบุญ</a>
   </div>
 
-  <footer class="site-footer">
-    <div>Wat Events · ข่าวงานบุญและกิจกรรมวัด</div>
-    <div class="footer-meta" id="footer-meta"></div>
-  </footer>
+  <div style="flex: 1;"></div>
 
-  <script>
-    /* ───────────────── DATA + CONFIG ───────────────── */
-    const THAI_MONTHS_SHORT = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  <div class="seg seg-filter" id="filterSeg">
+    <button data-f="all" class="on">ทั้งหมด</button>
+    <button data-f="th" class="off">ในไทย</button>
+    <button data-f="world" class="off">ต่างประเทศ</button>
+  </div>
 
-    const CATEGORIES = [
-      { id: 'all',         label: 'ทั้งหมด',     en: 'All' },
-      { id: 'งานบุญ',      label: 'งานบุญ',      en: 'Merit' },
-      { id: 'ทำบุญ',       label: 'ทำบุญ',       en: 'Almsgiving' },
-      { id: 'เทศกาล',      label: 'เทศกาล',      en: 'Festival' },
-      { id: 'งานอบรม',     label: 'งานอบรม',     en: 'Retreat' },
-      { id: 'ต่างประเทศ',  label: 'ต่างประเทศ',  en: 'Abroad' },
-      { id: 'ศูนย์สาขา',   label: 'ศูนย์สาขา',   en: 'Branches' },
-    ];
+  <div class="searchbox">
+    <span style="color: #9AA2BF; font-size: 14px;">⌕</span>
+    <input id="searchInput" placeholder="ค้นหาศูนย์ / พื้นที่…">
+  </div>
+</header>
 
-    const TIME_FILTERS = [
-      { id: 'all',       th: 'ทั้งหมด',   en: 'All' },
-      { id: 'week',      th: 'สัปดาห์นี้', en: 'This week' },
-      { id: 'month',     th: 'เดือนนี้',  en: 'This month' },
-      { id: 'important', th: 'สำคัญ',     en: 'Featured' },
-    ];
+<!-- ===== PAGE HEAD ===== -->
+<div class="page-head">
+  <div class="page-eyebrow">— อัปเดตล่าสุด</div>
+  <div class="page-head-row">
+    <h1>ความเคลื่อนไหวทุกวัด · เรียงตามวันที่อัปเดต</h1>
+    <div class="page-count"><span id="count">—</span> ศูนย์ · ใหม่สุดอยู่บน</div>
+  </div>
+</div>
 
-    const state = {
-      events: [],
-      activeCat: 'all',
-      activeTime: 'all',
-    };
+<!-- ===== GRID ===== -->
+<div class="grid-wrap">
+  <div class="grid" id="grid"></div>
+  <div class="no-results" id="noResults" style="display: none;">
+    <div class="circle"></div>
+    <div class="tt">ไม่พบศูนย์ที่ค้นหา</div>
+    <p>ลองเปลี่ยนคำค้น หรือเลือกตัวกรองอื่น</p>
+  </div>
+</div>
 
-    /* ───────────────── HELPERS ───────────────── */
-    function toDate(s) {
-      const [y, m, d] = s.split('-').map(Number);
-      return new Date(y, m - 1, d);
-    }
-    function todayMid() {
-      const t = new Date();
-      t.setHours(0, 0, 0, 0);
-      return t;
-    }
-    function daysUntil(s) {
-      return Math.round((toDate(s) - todayMid()) / 86400000);
-    }
-    function formatDate(s) {
-      const d = toDate(s);
-      return `${d.getDate()} ${THAI_MONTHS_SHORT[d.getMonth()]} ${d.getFullYear() + 543}`;
-    }
-    function escapeHTML(s) {
-      return String(s).replace(/[&<>"']/g, c => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-      }[c]));
-    }
+<script>
+(function () {
+  'use strict';
 
-    /* ───────────────── SVG ICONS ───────────────── */
-    const SVG = {
-      lightning: '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 L4 14 h7 l-1 8 L20 10 h-7 z"/></svg>',
-      temple: '<svg class="temple-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 L3 7 h18 z"/><path d="M5 7 v13 h14 V7"/><path d="M10 20 v-5 h4 v5"/><path d="M5 11 h14 M5 15 h14"/></svg>',
-      calendar: '<svg class="meta-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9 h18"/><path d="M8 3 v4 M16 3 v4"/></svg>',
-      phone: '<svg class="meta-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
-      download: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
-      downloadSmall: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
-    };
+  var state = { filter: 'all', search: '' };
+  var CENTERS = []; // โหลดจาก centers.json (สร้างด้วย scripts/build_centers_json.py)
 
-    /* ───────────────── COUNTDOWN ───────────────── */
-    function renderCountdown(dateStr, featured) {
-      const d = daysUntil(dateStr);
-      if (d < 0) return '';
-      if (d === 0) {
-        return `<span class="countdown today${featured ? ' on-coral' : ''}">● วันนี้</span>`;
-      }
-      let cls = 'countdown';
-      let label;
-      if (d === 1) { cls += ' soon'; label = 'พรุ่งนี้'; }
-      else if (d <= 7) { cls += ' soon'; label = `อีก ${d} วัน`; }
-      else { label = `อีก ${d} วัน`; }
-      return `<span class="${cls}">${SVG.lightning} ${label}</span>`;
-    }
+  function centerTier(clips) { return clips >= 40 ? 'high' : clips >= 15 ? 'mid' : 'low'; }
+  // ป้ายความเคลื่อนไหว — ใช้ active_level จริงจากเพจ ถ้าไม่มีให้ประเมินจากจำนวนคลิป
+  function pill(c) {
+    if (c.active === 'active') return { label: 'เคลื่อนไหวสูง', bg: '#F5821F' };
+    if (c.active === 'พอใช้') return { label: 'เคลื่อนไหวปานกลาง', bg: 'rgba(245,130,31,0.78)' };
+    if (c.active === 'เงียบ') return { label: 'เคลื่อนไหวน้อย', bg: 'rgba(149,160,188,0.9)' };
+    if (c.active === 'ไม่มีเพจ') return { label: 'ไม่มีเพจ', bg: 'rgba(149,160,188,0.9)' };
+    var t = centerTier(c.clips);
+    if (t === 'high') return { label: 'เคลื่อนไหวสูง', bg: '#F5821F' };
+    if (t === 'mid') return { label: 'เคลื่อนไหวปานกลาง', bg: 'rgba(245,130,31,0.78)' };
+    return { label: 'เคลื่อนไหวน้อย', bg: 'rgba(149,160,188,0.9)' };
+  }
 
-    /* ───────────────── CARD ───────────────── */
-    function renderCard(ev, featured) {
-      const primary = ev.categories[0];
-      const extra = ev.categories.slice(1);
-      const downloads = ev.card_count || (ev.cards ? ev.cards.length : 0);
+  function placeOf(c) {
+    if (c.scope === 'INTL') return [c.en, c.country].filter(Boolean).join(' · ');
+    return [c.province, 'ภาค' + c.region].filter(Boolean).join(' · ');
+  }
+  function activityOf(c) {
+    if (c.videos && c.videos.length) return c.videos[0].t;
+    if (c.types && c.types.length) return c.types.join(' · ');
+    return '—';
+  }
+  function fmtLast(c) { return c.lastPost ? c.lastPost.replace(/(\D)(\d{4})$/, '$1 $2') : ''; }
 
-      const morePill = extra.length > 0
-        ? `<span class="pill-more-wrap">
-             <button type="button" class="pill-more" aria-label="หมวดเพิ่มเติม">+${extra.length}</button>
-             <span class="pill-more-pop">${extra.map(escapeHTML).join(' · ')}</span>
-           </span>`
-        : '';
+  function esc(s) { return ('' + s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
-      const importantDot = (ev.important && !featured)
-        ? '<span class="dot-important" title="งานสำคัญ"></span>'
-        : '';
+  function render() {
+    var q = state.search.trim().toLowerCase();
 
-      const contactRow = ev.contact
-        ? `<div class="meta-line">${SVG.phone}<span>${escapeHTML(ev.contact)}</span></div>`
-        : '';
-
-      const downloadCount = downloads > 1 ? `<span class="download-count">${downloads}</span>` : '';
-      const downloadBtn = downloads > 0
-        ? `<div class="card-footer">
-             <button type="button" class="download-btn" data-event-id="${ev.id}">
-               ${SVG.download} ดาวน์โหลดการ์ด ${downloadCount}
-             </button>
-           </div>`
-        : '';
-
-      return `
-        <article class="card${featured ? ' card-featured' : ''}">
-          <header class="card-top">
-            <div class="card-top-left">
-              <span class="pill">${escapeHTML(primary)}</span>
-              ${morePill}
-              ${importantDot}
-            </div>
-            ${renderCountdown(ev.date, featured)}
-          </header>
-          <div class="card-temple">
-            ${SVG.temple}
-            <span class="temple-name">${escapeHTML(ev.temple)}</span>
-          </div>
-          <h2 class="card-title">${escapeHTML(ev.title)}</h2>
-          <div class="meta-list">
-            <div class="meta-line">${SVG.calendar}<span>${escapeHTML(ev.date_display)}</span></div>
-            ${contactRow}
-          </div>
-          ${downloadBtn}
-        </article>
-      `;
-    }
-
-    /* ───────────────── FILTER LISTS ───────────────── */
-    function renderFilterChips(counts) {
-      const catRow = document.getElementById('cat-filters');
-      catRow.innerHTML = CATEGORIES.map(c => `
-        <button type="button" class="chip${state.activeCat === c.id ? ' chip-active' : ''}" data-cat="${escapeHTML(c.id)}">
-          <span class="chip-en">${c.en}</span>
-          <span class="chip-th">${escapeHTML(c.label)}</span>
-          <span class="chip-count">${counts[c.id] ?? 0}</span>
-        </button>
-      `).join('');
-
-      const timeRow = document.getElementById('time-filters');
-      timeRow.innerHTML = TIME_FILTERS.map(t => `
-        <button type="button" class="time-chip${state.activeTime === t.id ? ' time-chip-active' : ''}" data-time="${escapeHTML(t.id)}">
-          ${t.en} · <span class="th">${escapeHTML(t.th)}</span>
-        </button>
-      `).join('');
-    }
-
-    /* ───────────────── FILTER + SORT ───────────────── */
-    function getUpcoming() {
-      const today = todayMid();
-      return state.events.filter(e => toDate(e.date) >= today);
-    }
-
-    function computeCounts() {
-      const upcoming = getUpcoming();
-      const counts = { all: upcoming.length };
-      CATEGORIES.forEach(c => {
-        if (c.id === 'all') return;
-        counts[c.id] = upcoming.filter(e => e.categories.includes(c.id)).length;
-      });
-      return counts;
-    }
-
-    function getFiltered() {
-      let list = getUpcoming();
-      if (state.activeCat !== 'all') {
-        list = list.filter(e => e.categories.includes(state.activeCat));
-      }
-      if (state.activeTime === 'week') {
-        list = list.filter(e => daysUntil(e.date) <= 7);
-      } else if (state.activeTime === 'month') {
-        const today = todayMid();
-        list = list.filter(e => {
-          const d = toDate(e.date);
-          return d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth();
-        });
-      } else if (state.activeTime === 'important') {
-        list = list.filter(e => e.important);
-      }
-      return [...list].sort((a, b) => toDate(a.date) - toDate(b.date));
-    }
-
-    /* ───────────────── RENDER ───────────────── */
-    function render() {
-      const counts = computeCounts();
-      renderFilterChips(counts);
-      document.getElementById('upcoming-count').textContent = `${counts.all} upcoming`;
-
-      const filtered = getFiltered();
-      const main = document.getElementById('main-content');
-
-      if (filtered.length === 0) {
-        main.innerHTML = `
-          <div class="empty">
-            <div class="empty-mark">◌</div>
-            <p>ไม่พบกิจกรรมในตัวกรองนี้</p>
-            <p class="empty-sub">ลองเลือกหมวดหรือช่วงเวลาอื่น</p>
-          </div>
-        `;
-        return;
-      }
-
-      const featured = filtered.find(e => e.important) || filtered[0];
-      const rest = filtered.filter(e => e !== featured);
-
-      const featuredHTML = featured ? `
-        <section class="featured-section">
-          <div class="section-eyebrow">FEATURED · ไฮไลต์</div>
-          ${renderCard(featured, true)}
-        </section>
-      ` : '';
-
-      const restHTML = `
-        <section class="list-section">
-          <div class="section-eyebrow">
-            UPCOMING · กำลังจะถึง
-            <span class="section-count">${rest.length}</span>
-          </div>
-          <div class="list">
-            ${rest.map(e => renderCard(e, false)).join('')}
-          </div>
-        </section>
-      `;
-
-      main.innerHTML = featuredHTML + restHTML;
-    }
-
-    /* ───────────────── MODAL ───────────────── */
-    function openModal(ev) {
-      const modal = document.getElementById('card-modal');
-      const cards = ev.cards || [];
-      document.getElementById('modal-title').textContent = ev.title;
-      document.getElementById('modal-subtitle').textContent = `${cards.length} การ์ด · ${formatDate(ev.date)}`;
-      document.getElementById('modal-grid').innerHTML = cards.map((name, i) => `
-        <a class="modal-card" href="cards/${encodeURIComponent(name)}" download="${escapeHTML(name)}">
-          <img src="cards/${encodeURIComponent(name)}" alt="การ์ดที่ ${i + 1}" loading="lazy">
-          <span class="modal-card-label">${SVG.downloadSmall} Download</span>
-        </a>
-      `).join('');
-      modal.hidden = false;
-      document.body.style.overflow = 'hidden';
-      setTimeout(() => modal.querySelector('.modal-close')?.focus(), 50);
-    }
-
-    function closeModal() {
-      const modal = document.getElementById('card-modal');
-      modal.hidden = true;
-      document.body.style.overflow = '';
-    }
-
-    /* ───────────────── EVENTS ───────────────── */
-    function bindEvents() {
-      // Filter chips delegation (cat + time both update state)
-      document.addEventListener('click', (e) => {
-        const catBtn = e.target.closest('#cat-filters .chip');
-        if (catBtn) {
-          state.activeCat = catBtn.dataset.cat;
-          render();
-          return;
-        }
-        const timeBtn = e.target.closest('#time-filters .time-chip');
-        if (timeBtn) {
-          state.activeTime = timeBtn.dataset.time;
-          render();
-          return;
-        }
-
-        // Download button → open modal
-        const dlBtn = e.target.closest('.download-btn[data-event-id]');
-        if (dlBtn) {
-          const id = Number(dlBtn.dataset.eventId);
-          const ev = state.events.find(x => x.id === id);
-          if (ev) openModal(ev);
-          return;
-        }
-
-        // More-cats popover toggle
-        const morePill = e.target.closest('.pill-more');
-        document.querySelectorAll('.pill-more-pop.show').forEach(p => {
-          if (!morePill || !morePill.parentElement.contains(p)) p.classList.remove('show');
-        });
-        if (morePill) {
-          const pop = morePill.parentElement.querySelector('.pill-more-pop');
-          if (pop) pop.classList.toggle('show');
-          return;
-        }
-
-        // Modal close
-        if (e.target.closest('[data-close]')) {
-          closeModal();
-        }
-      });
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !document.getElementById('card-modal').hidden) {
-          closeModal();
-        }
+    var list = CENTERS.slice();
+    if (state.filter === 'th') list = list.filter(function (c) { return c.scope === 'TH'; });
+    if (state.filter === 'world') list = list.filter(function (c) { return c.scope === 'INTL'; });
+    if (q) {
+      list = list.filter(function (c) {
+        var hay = (c.name + ' ' + (c.en || '') + ' ' + c.country + ' ' + (c.province || '') + ' ' + c.region).toLowerCase();
+        return hay.indexOf(q) !== -1;
       });
     }
 
-    /* ───────────────── INIT ───────────────── */
-    async function init() {
-      const now = new Date();
-      document.getElementById('footer-meta').textContent =
-        `© ${now.getFullYear() + 543} · ปรับปรุง ${now.getDate()} ${THAI_MONTHS_SHORT[now.getMonth()]}`;
+    // ใหม่สุดอยู่บน: เรียงจากโพสต์ล่าสุดบนเพจ แล้วค่อยจำนวนคลิปในคลัง
+    list.sort(function (a, b) { return (b.lastTs || 0) - (a.lastTs || 0) || b.clips - a.clips; });
 
-      bindEvents();
-      try {
-        const res = await fetch('events.json', { cache: 'no-store' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        state.events = await res.json();
-      } catch (err) {
-        console.error(err);
-        document.getElementById('main-content').innerHTML = `
-          <div class="empty">
-            <div class="empty-mark">⚠</div>
-            <p>ไม่สามารถโหลดข้อมูลกิจกรรมได้</p>
-            <p class="empty-sub">${escapeHTML(err.message)}</p>
-          </div>
-        `;
-        return;
-      }
-      render();
-    }
+    document.querySelectorAll('#filterSeg button').forEach(function (b) {
+      b.className = state.filter === b.dataset.f ? 'on' : 'off';
+    });
 
-    init();
-  </script>
+    document.getElementById('count').textContent = list.length;
+    document.getElementById('noResults').style.display = list.length === 0 ? 'block' : 'none';
+
+    var html = '';
+    list.forEach(function (c) {
+      var p = pill(c);
+      var last = fmtLast(c);
+      var cta = c.fb
+        ? '<a class="card-cta" href="' + esc(c.fb) + '" target="_blank" rel="noopener">ดูข้อมูลหน้าเพจ ↗</a>'
+        : '<a class="card-cta" href="map.html">ดูบนแผนที่ →</a>';
+      html += '<div class="card">' +
+        '<div class="card-top">' +
+        '<span class="act-pill" style="background: ' + p.bg + ';"><span class="wdot"></span>' + esc(p.label) + '</span>' +
+        '<span class="card-scope">' + (c.scope === 'INTL' ? 'ต่างประเทศ' : 'ในไทย') + '</span></div>' +
+        '<div class="card-name">' + esc(c.name) + '</div>' +
+        '<div class="card-place">' + esc(placeOf(c)) + '</div>' +
+        '<div class="card-act"><div class="lbl">ทำกิจกรรม</div>' +
+        '<div class="tt">' + esc(activityOf(c)) + '</div></div>' +
+        '<div class="card-date"><span class="ico">📅</span>' +
+        '<span class="tx">อัปเดตล่าสุด <b>' + (last ? esc(last) : '—') + '</b></span></div>' +
+        '<div class="card-spacer"></div>' +
+        cta +
+        '</div>';
+    });
+    document.getElementById('grid').innerHTML = html;
+  }
+
+  document.querySelectorAll('#filterSeg button').forEach(function (b) {
+    b.addEventListener('click', function () { state.filter = b.dataset.f; render(); });
+  });
+  document.getElementById('searchInput').addEventListener('input', function (e) { state.search = e.target.value; render(); });
+
+  fetch('centers.json')
+    .then(function (r) { return r.json(); })
+    .then(function (d) { CENTERS = d.centers; render(); })
+    .catch(function () {
+      document.getElementById('noResults').style.display = 'block';
+      document.querySelector('#noResults .tt').textContent = 'โหลดข้อมูลไม่สำเร็จ';
+      document.querySelector('#noResults p').textContent = 'ไม่พบ centers.json — รัน python3 scripts/build_centers_json.py ก่อน';
+    });
+
+  render();
+})();
+</script>
 </body>
 </html>

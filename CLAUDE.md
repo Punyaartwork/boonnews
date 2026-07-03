@@ -6,17 +6,23 @@
 
 ```
 boonnews/
-├── index.html              # หน้าเว็บหลัก (pure HTML/CSS/JS)
-├── events.json             # ฐานข้อมูลกิจกรรมทั้งหมด
+├── index.html              # หน้าแรก: กริดความเคลื่อนไหวทุกวัด (จาก centers.json)
+├── map.html                # แผนที่เครือข่ายวัด ไทย/รอบโลก (จาก centers.json)
+├── centers.json            # ฐานข้อมูลศูนย์ 253 แห่ง (generate — ห้ามแก้มือ)
+├── events.html             # หน้าข่าวงานบุญ/กิจกรรมวัด (เดิมคือ index.html — workflow /add ชี้หน้านี้)
+├── events.json             # ฐานข้อมูลกิจกรรมทั้งหมด (ของ events.html)
 ├── cards/                  # รูปการ์ดทั้งหมด (track ใน git)
 ├── inbox/                  # drop zone การ์ดใหม่ (gitignored)
 ├── scripts/
 │   ├── add_card.py         # validate + commit + push
-│   └── deploy.py           # ssh + git pull บน VPS
+│   ├── deploy.py           # ssh + git pull บน VPS
+│   └── build_centers_json.py  # สร้าง centers.json จาก ~/Documents/boonnews_work/data
 ├── .claude/commands/add.md # slash command /add
 ├── .gitignore
 └── README.md
 ```
+
+หมายเหตุ: "หน้าเว็บหลัก" ของ workflow /add และ Frontend Logic ด้านล่าง หมายถึง `events.html`
 
 ## Schema ของ events.json
 

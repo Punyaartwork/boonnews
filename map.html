@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOON NEWS · แผนที่เครือข่ายวัด</title>
+<meta name="description" content="แผนที่เครือข่ายวัดทั่วโลกและในไทย พร้อมความเคลื่อนไหวรายกิจกรรม">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #EEF1F8; font-family: 'IBM Plex Sans Thai', sans-serif; color: #1B2348; }
+  button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; padding: 0; }
+  input { font: inherit; outline: none; }
+  input::placeholder { color: #9AA2BF; }
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-thumb { background: #C7CEE0; border-radius: 6px; }
+  @keyframes bn-panel-in { from { transform: translateX(28px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes bn-fade-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes bn-pop-in { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes bn-pin-pulse { 0% { box-shadow: 0 0 0 0 rgba(245,130,31,0.55); } 70% { box-shadow: 0 0 0 14px rgba(245,130,31,0); } 100% { box-shadow: 0 0 0 0 rgba(245,130,31,0); } }
+  @keyframes bn-spin { to { transform: rotate(360deg); } }
+
+  .mono { font-family: 'Space Mono', monospace; }
+
+  #app { min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+
+  /* ===== APP BAR ===== */
+  .appbar { display: flex; align-items: center; gap: 22px; padding: 13px 28px; border-bottom: 1px solid #E4E8F3; background: rgba(255,255,255,0.94); backdrop-filter: blur(8px); position: relative; z-index: 40; flex-wrap: wrap; }
+  .logo-btn { display: flex; align-items: center; gap: 13px; }
+  .logo-stack { display: flex; flex-direction: column; gap: 3px; line-height: 1; }
+  .logo-boon { align-self: flex-start; background: linear-gradient(95deg, #FF9E33, #F5821F); padding: 2px 8px 3px; transform: skewX(-10deg); box-shadow: 0 2px 7px rgba(245,130,31,0.32); }
+  .logo-news { align-self: flex-start; margin-left: 6px; background: #15276B; padding: 2px 8px 3px; transform: skewX(-10deg); box-shadow: 0 2px 7px rgba(21,39,107,0.28); }
+  .logo-word { display: inline-block; transform: skewX(10deg); color: #fff; font-weight: 800; font-size: 15px; letter-spacing: 0.03em; }
+  .logo-sub { font-size: 13px; color: #6B7393; border-left: 1px solid #E4E8F3; padding-left: 13px; }
+  .seg { display: inline-flex; border: 1.5px solid #15276B; border-radius: 22px; overflow: hidden; font-size: 14px; font-weight: 600; }
+  .seg > * { padding: 7px 16px; white-space: nowrap; transition: all 0.15s ease; text-decoration: none; }
+  .seg .on { background: #15276B; color: #fff; }
+  .seg .off { background: transparent; color: #15276B; }
+  .seg-mode > * { padding: 7px 20px; }
+  .searchbox { display: flex; align-items: center; gap: 9px; border: 1.5px solid #E0E5F1; border-radius: 22px; padding: 7px 14px; background: #F4F6FB; min-width: 240px; }
+  .searchbox input { border: none; background: transparent; flex: 1; font-size: 14px; color: #1B2348; }
+
+  /* ===== MAP STAGE ===== */
+  .map-stage { position: relative; flex: 1; min-height: 640px; overflow: hidden; background: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1.6px) 0 0 / 26px 26px, radial-gradient(ellipse at 50% 2%, #21356F 0%, #0C1A4A 74%); }
+  #mapHost { position: absolute; inset: 0; z-index: 1; }
+  #mapHost svg { position: absolute; inset: 0; display: block; transition: all 0.3s ease; }
+
+  .hero { position: absolute; top: 30px; left: 32px; z-index: 12; max-width: 350px; pointer-events: none; }
+  .hero-eyebrow { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #FFA742; margin-bottom: 10px; }
+  .hero h1 { font-size: 35px; font-weight: 700; margin: 0; line-height: 1.16; color: #fff; letter-spacing: -0.01em; }
+  .hero p { font-size: 14px; color: rgba(255,255,255,0.68); margin: 13px 0 0; line-height: 1.55; }
+
+  .zoom-chip-wrap { position: absolute; top: 30px; left: 32px; z-index: 13; }
+  .zoom-chip { display: inline-flex; align-items: center; gap: 9px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.22); backdrop-filter: blur(8px); color: #fff; border-radius: 22px; padding: 9px 17px 9px 14px; font-size: 14px; font-weight: 600; transition: background 0.13s ease; }
+  .zoom-chip:hover { background: rgba(255,255,255,0.18); }
+  .zoom-chip .mono { font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 400; }
+
+  .stairs { position: absolute; top: 30px; right: 32px; z-index: 12; display: flex; gap: 10px; align-items: flex-start; }
+  .stair-card { width: 168px; text-align: left; backdrop-filter: blur(8px); padding: 13px 14px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.07); transition: transform 0.12s ease, border-color 0.12s ease; }
+  .stair-card:hover { transform: translateY(-3px); }
+  .stair-card .nm { font-weight: 600; font-size: 13.5px; line-height: 1.3; color: #fff; }
+  .stair-card .act { font-size: 11.5px; color: rgba(255,255,255,0.7); margin-top: 7px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .stair-card .last { font-size: 10.5px; color: rgba(255,255,255,0.5); margin-top: 8px; font-family: 'Space Mono', monospace; letter-spacing: 0.02em; }
+
+  .chips { position: absolute; left: 32px; bottom: 28px; z-index: 12; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .chip-toggle { display: inline-flex; align-items: center; gap: 8px; border: 1.5px solid rgba(255,255,255,0.24); background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.82); border-radius: 20px; padding: 8px 15px; font-size: 13px; font-weight: 500; backdrop-filter: blur(6px); transition: all 0.15s ease; }
+  .chip-toggle .dot { width: 11px; height: 11px; border-radius: 50%; background: currentColor; }
+  .chip-toggle.on { border-color: #F5821F; background: rgba(245,130,31,0.20); color: #FFB661; }
+  .legend { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); border-radius: 20px; padding: 8px 16px; font-size: 12.5px; color: rgba(255,255,255,0.82); backdrop-filter: blur(6px); flex-wrap: nowrap; }
+  .legend .lbl { font-family: 'Space Mono', monospace; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.5); white-space: nowrap; }
+  .legend .it { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+  .legend .sw { width: 12px; height: 12px; border-radius: 3px; }
+
+  #tooltip { position: absolute; transform: translate(-50%,-138%); z-index: 25; pointer-events: none; background: #fff; border-radius: 9px; padding: 8px 12px; box-shadow: 0 8px 24px rgba(8,16,46,0.32); white-space: nowrap; display: none; }
+  #tooltip .tl { font-size: 13px; font-weight: 700; color: #15276B; }
+  #tooltip .ts { font-family: 'Space Mono', monospace; font-size: 11px; color: #6B7393; margin-top: 2px; }
+
+  .loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2; gap: 12px; }
+  .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.25); border-top-color: #F5821F; border-radius: 50%; animation: bn-spin 0.8s linear infinite; }
+  .loading .mono, .maperr { font-family: 'Space Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 0.08em; }
+  .maperr { position: absolute; left: 50%; top: 66%; transform: translate(-50%,-50%); z-index: 2; color: rgba(255,255,255,0.45); text-align: center; letter-spacing: normal; }
+
+  /* ===== CENTERS PANEL ===== */
+  .panel { position: absolute; top: 0; right: 0; bottom: 0; width: 384px; background: #fff; z-index: 30; display: flex; flex-direction: column; box-shadow: -16px 0 44px rgba(8,16,46,0.30); animation: bn-panel-in 0.26s ease; }
+  .panel-bar { height: 4px; background: linear-gradient(90deg, #F5821F, #FF9E33); flex-shrink: 0; }
+  .panel-head { padding: 20px 24px 16px; border-bottom: 1px solid #EDF0F7; }
+  .panel-close { font-family: 'Space Mono', monospace; font-size: 12px; color: #6B7393; margin-bottom: 14px; }
+  .panel-head h2 { font-size: 25px; font-weight: 700; margin: 0; color: #15276B; letter-spacing: -0.01em; }
+  .panel-sub { font-size: 13px; color: #6B7393; margin-top: 6px; font-family: 'Space Mono', monospace; }
+  .panel-body { flex: 1; overflow-y: auto; padding: 8px 14px 24px; }
+  .panel-sec { font-size: 11px; color: #97A0BC; padding: 13px 10px 8px; font-family: 'Space Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; }
+  .center-row { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 11px 10px; border-radius: 10px; transition: background 0.12s ease; }
+  .center-row:hover { background: #F2F5FC; }
+  .center-row .rk { font-family: 'Space Mono', monospace; font-size: 12px; color: #B3BAD0; width: 20px; flex-shrink: 0; }
+  .center-row .dt { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .center-row .mid { flex: 1; min-width: 0; }
+  .center-row .nm { display: block; font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1B2348; }
+  .center-row .en { display: block; font-size: 11.5px; color: #6B7393; }
+  .center-row .rt { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .center-row .bar { width: 56px; height: 7px; background: #E7EBF4; border-radius: 5px; overflow: hidden; }
+  .center-row .bar span { display: block; height: 100%; background: #F5821F; }
+  .center-row .ct { font-family: 'Space Mono', monospace; font-size: 12px; width: 30px; text-align: right; color: #15276B; font-weight: 700; }
+  .panel-empty { margin: 18px 10px; padding: 24px; border: 1.5px dashed #C7CEE0; border-radius: 14px; text-align: center; background: #F7F9FD; }
+  .empty-circle { width: 46px; height: 46px; border-radius: 50%; border: 1.5px dashed #A9B2CC; margin: 0 auto 12px; }
+  .panel-empty .tt { font-weight: 700; font-size: 16px; margin-bottom: 6px; color: #15276B; }
+  .panel-empty p { font-size: 13px; color: #6B7393; margin: 0 0 18px; line-height: 1.55; }
+  .btn-navy { background: #15276B; color: #fff; border-radius: 22px; padding: 10px 20px; font-size: 13px; font-weight: 600; }
+
+  /* ===== CENTER DETAIL POPUP ===== */
+  .cp-overlay { position: absolute; inset: 0; z-index: 40; background: rgba(8,16,46,0.55); display: flex; align-items: center; justify-content: center; padding: 30px; animation: bn-fade-in 0.2s ease; }
+  .cp { width: 420px; max-width: 100%; background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 26px 64px rgba(8,16,46,0.42); animation: bn-pop-in 0.22s ease; }
+  .cp-bar { height: 4px; background: linear-gradient(90deg, #F5821F, #FF9E33); }
+  .cp-head { padding: 22px 26px 0; }
+  .cp-head-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
+  .eyebrow-line { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+  .eyebrow-dash { width: 22px; height: 3px; background: #F5821F; border-radius: 2px; }
+  .eyebrow-txt { font-family: 'Space Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #97A0BC; }
+  .cp h2 { font-size: 23px; font-weight: 700; margin: 0; color: #15276B; line-height: 1.2; letter-spacing: -0.01em; }
+  .cp-meta { font-size: 13px; color: #6B7393; margin-top: 5px; font-family: 'Space Mono', monospace; }
+  .cp-x { font-size: 17px; color: #97A0BC; line-height: 1; padding: 2px 4px; flex-shrink: 0; }
+  .act-badge { display: inline-flex; align-items: center; gap: 7px; margin-top: 14px; border-radius: 20px; padding: 6px 14px; font-size: 12.5px; font-weight: 700; color: #fff; background: #F5821F; box-shadow: 0 4px 12px rgba(245,130,31,0.3); }
+  .act-badge .wdot { width: 7px; height: 7px; border-radius: 50%; background: #fff; }
+  .cp-stats { padding: 18px 26px 0; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .stat { background: #F7F9FD; border: 1px solid #EAEEF7; border-radius: 11px; padding: 11px 13px; }
+  .stat .v { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; color: #15276B; line-height: 1; }
+  .stat .l { font-size: 10.5px; color: #6B7393; margin-top: 4px; }
+  .cp-sec { padding: 18px 26px 0; }
+  .sec-lbl { font-family: 'Space Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #97A0BC; margin-bottom: 6px; }
+  .cp-activity { font-size: 14px; color: #1B2348; font-weight: 500; line-height: 1.4; }
+  .cp-last { font-size: 12px; color: #6B7393; margin-top: 4px; font-family: 'Space Mono', monospace; }
+  .cat-row { display: flex; align-items: center; gap: 12px; margin-bottom: 9px; }
+  .cat-row .nm { width: 124px; flex-shrink: 0; font-size: 12.5px; color: #1B2348; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cat-row .bar { flex: 1; height: 8px; background: #EEF1F8; border-radius: 5px; overflow: hidden; }
+  .cat-row .bar span { display: block; height: 100%; background: linear-gradient(90deg, #FF9E33, #F5821F); border-radius: 5px; }
+  .cp-foot { padding: 16px 26px 22px; }
+  .btn-full { width: 100%; background: #15276B; color: #fff; border-radius: 24px; padding: 12px; font-size: 14px; font-weight: 600; transition: background 0.13s ease; }
+  .btn-full:hover { background: #1B3187; }
+
+  /* ===== TEMPLE DETAIL VIEW ===== */
+  #templeView { flex: 1; min-height: 600px; display: none; }
+  .temple-wrap { max-width: 1080px; margin: 0 auto; padding: 26px 34px 70px; animation: bn-fade-in 0.25s ease; }
+  .crumb { font-family: 'Space Mono', monospace; font-size: 13px; color: #6B7393; margin-bottom: 18px; }
+  .temple-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 28px; flex-wrap: wrap; }
+  .temple-head-l { flex: 1; min-width: 280px; }
+  .temple-head-l .eyebrow-line { margin-bottom: 12px; }
+  .temple-head-l .eyebrow-dash { width: 26px; }
+  .temple-head-l .eyebrow-txt { font-size: 11px; letter-spacing: 0.16em; }
+  .temple-head-l h1 { font-size: 39px; font-weight: 700; margin: 0; line-height: 1.1; color: #15276B; letter-spacing: -0.015em; }
+  .temple-meta { font-size: 15px; color: #6B7393; margin-top: 7px; }
+  .temple-stats { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .tstat { background: #fff; border: 1px solid #E4E8F3; border-radius: 12px; padding: 9px 15px; }
+  .tstat .v { font-family: 'Space Mono', monospace; font-size: 19px; font-weight: 700; color: #15276B; line-height: 1; }
+  .tstat .vt { font-size: 13.5px; font-weight: 700; color: #15276B; line-height: 1; margin-top: 2px; font-family: 'IBM Plex Sans Thai', sans-serif; }
+  .tstat .l { font-size: 11px; color: #6B7393; margin-top: 3px; }
+  .temple-head-r { display: flex; flex-direction: column; gap: 9px; align-items: flex-end; }
+  .act-badge-lg { display: inline-flex; align-items: center; gap: 8px; border-radius: 22px; padding: 8px 16px; font-size: 13.5px; font-weight: 700; color: #fff; background: #F5821F; box-shadow: 0 4px 14px rgba(245,130,31,0.32); }
+  .act-badge-lg .wdot { width: 8px; height: 8px; border-radius: 50%; background: #fff; }
+  .fb-link { display: inline-flex; align-items: center; gap: 8px; border: 1.5px solid #E0E5F1; border-radius: 22px; padding: 7px 16px; font-size: 13.5px; color: #2563EB; text-decoration: none; background: #fff; }
+
+  .story { display: flex; background: #fff; border: 1px solid #E4E8F3; border-radius: 16px; overflow: hidden; margin: 24px 0 30px; box-shadow: 0 8px 26px rgba(20,33,92,0.07); }
+  .story-edge { width: 5px; background: linear-gradient(180deg, #FF9E33, #F5821F); flex-shrink: 0; }
+  .story-body { padding: 26px 30px; }
+  .story-eyebrow { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #F5821F; margin-bottom: 10px; }
+  .story-body h2 { font-size: 26px; font-weight: 700; margin: 0 0 14px; line-height: 1.3; color: #15276B; letter-spacing: -0.01em; }
+  .story-body p { font-size: 15.5px; line-height: 1.78; color: #3A4360; margin: 0; max-width: 680px; white-space: pre-line; }
+
+  .actcard { background: #fff; border: 1px solid #E4E8F3; border-radius: 16px; padding: 22px 26px; margin-bottom: 30px; box-shadow: 0 8px 26px rgba(20,33,92,0.06); }
+  .actcard-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+  .actcard-head h3 { font-size: 18px; font-weight: 700; margin: 0; color: #15276B; }
+  .actcard-note { font-family: 'Space Mono', monospace; font-size: 11px; color: #97A0BC; }
+  .actgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 34px; }
+  .actrow { display: flex; align-items: center; gap: 14px; }
+  .actrow .nm { width: 132px; flex-shrink: 0; font-size: 13.5px; color: #1B2348; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .actrow .bar { flex: 1; height: 9px; background: #EEF1F8; border-radius: 6px; overflow: hidden; }
+  .actrow .bar span { display: block; height: 100%; background: linear-gradient(90deg, #FF9E33, #F5821F); border-radius: 6px; }
+  .actrow .ps { width: 58px; flex-shrink: 0; text-align: right; font-family: 'Space Mono', monospace; font-size: 12px; color: #6B7393; }
+  .actcard .none { font-size: 13.5px; color: #6B7393; }
+
+  .clips-layout { display: grid; grid-template-columns: 1fr 240px; gap: 30px; align-items: start; }
+  .clips-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .clips-head h3 { font-size: 19px; font-weight: 700; margin: 0; color: #15276B; }
+  .cat-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+  .cat-chip { font-size: 12.5px; font-weight: 500; border: 1.5px solid #D8DEEC; background: transparent; color: #6B7393; border-radius: 18px; padding: 6px 14px; transition: all 0.13s ease; }
+  .cat-chip.on { border-color: #15276B; background: #15276B; color: #fff; }
+  .clip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .clip-card { text-align: left; border: 1px solid #E4E8F3; border-radius: 13px; overflow: hidden; background: #fff; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+  .clip-card:hover { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(20,33,92,0.12); }
+  .clip-thumb { height: 120px; background: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1.4px) 0 0 / 18px 18px, linear-gradient(135deg, #1B2E6E, #2A3F8C); position: relative; }
+  .clip-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 44px; height: 44px; border-radius: 50%; background: #F5821F; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 15px; box-shadow: 0 4px 14px rgba(245,130,31,0.5); padding-left: 3px; }
+  .clip-dur { position: absolute; right: 8px; bottom: 7px; font-family: 'Space Mono', monospace; font-size: 11px; background: rgba(8,16,46,0.78); color: #fff; padding: 1px 7px; border-radius: 4px; }
+  .clip-info { padding: 12px 13px; }
+  .clip-title { font-size: 13.5px; font-weight: 600; line-height: 1.35; color: #1B2348; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .clip-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .clip-cat { font-family: 'Space Mono', monospace; font-size: 10.5px; color: #6B7393; }
+  .no-clips { padding: 36px; border: 1.5px dashed #C7CEE0; border-radius: 14px; text-align: center; color: #6B7393; background: #F7F9FD; }
+  .no-clips .circle { width: 42px; height: 42px; border-radius: 50%; border: 1.5px dashed #A9B2CC; margin: 0 auto 10px; }
+  .no-clips .tt { font-weight: 700; color: #15276B; margin-bottom: 4px; }
+  .no-clips .nt { font-size: 13px; }
+
+  .side-map { height: 168px; background: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1.4px) 0 0 / 18px 18px, linear-gradient(160deg, #1B2E6E, #0F1E54); border-radius: 14px; position: relative; overflow: hidden; margin-bottom: 16px; }
+  .side-map .lbl { position: absolute; left: 50%; top: 22%; transform: translateX(-50%); font-family: 'Space Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.4); }
+  .side-map .pin { position: absolute; left: 50%; top: 56%; transform: translate(-50%,-50%); width: 18px; height: 18px; border-radius: 50%; background: #F5821F; animation: bn-pin-pulse 2.2s infinite; }
+  .side-facts { font-size: 13.5px; line-height: 2; background: #fff; border: 1px solid #E4E8F3; border-radius: 14px; padding: 14px 18px; }
+  .side-facts > div { display: flex; justify-content: space-between; gap: 10px; }
+  .side-facts .k { color: #6B7393; flex-shrink: 0; }
+  .side-facts b { color: #1B2348; text-align: right; }
+  .side-facts .ok { color: #1F8A5B; }
+
+  /* ===== CLIP MODAL ===== */
+  .clip-overlay { position: fixed; inset: 0; background: rgba(8,16,46,0.58); z-index: 80; display: flex; align-items: center; justify-content: center; padding: 30px; animation: bn-fade-in 0.18s ease; backdrop-filter: blur(3px); }
+  .clip-modal { width: 640px; max-width: 100%; background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 30px 70px rgba(8,16,46,0.45); animation: bn-pop-in 0.2s ease; }
+  .clip-player { height: 320px; background: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1.4px) 0 0 / 20px 20px, linear-gradient(135deg, #1B2E6E, #2A3F8C); display: flex; align-items: center; justify-content: center; position: relative; }
+  .clip-player .play { width: 66px; height: 66px; border-radius: 50%; background: #F5821F; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 6px 20px rgba(245,130,31,0.55); padding-left: 4px; text-decoration: none; }
+  .clip-player .ph { position: absolute; left: 16px; bottom: 14px; font-family: 'Space Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.45); }
+  .clip-modal-body { padding: 22px 26px 26px; }
+  .clip-modal-body h3 { font-size: 20px; font-weight: 700; margin: 0 0 8px; color: #15276B; }
+  .clip-modal-meta { display: flex; align-items: center; gap: 14px; font-family: 'Space Mono', monospace; font-size: 12.5px; color: #6B7393; margin-bottom: 20px; }
+  .clip-modal-btns { display: flex; gap: 12px; }
+  .btn-accent { background: #F5821F; color: #fff; border-radius: 22px; padding: 11px 22px; font-size: 13.5px; font-weight: 600; text-decoration: none; box-shadow: 0 4px 14px rgba(245,130,31,0.32); }
+  .btn-ghost { border: 1.5px solid #E0E5F1; border-radius: 22px; padding: 11px 22px; font-size: 13.5px; color: #6B7393; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== APP BAR ===== -->
+  <header class="appbar">
+    <button class="logo-btn" id="btnHome">
+      <span class="logo-stack">
+        <span class="logo-boon"><span class="logo-word">BOON</span></span>
+        <span class="logo-news"><span class="logo-word">NEWS</span></span>
+      </span>
+      <span class="logo-sub">แผนที่เครือข่ายวัด</span>
+    </button>
+
+    <div class="seg">
+      <span class="on">▦ แผนที่</span>
+      <a class="off" href="index.html">▤ กริด</a>
+      <a class="off" href="events.html">▣ ข่าวงานบุญ</a>
+    </div>
+
+    <div class="seg seg-mode">
+      <button id="tabWorld" class="on">รอบโลก</button>
+      <button id="tabTh" class="off">ไทย</button>
+    </div>
+
+    <div style="flex: 1;"></div>
+
+    <div class="searchbox">
+      <span style="color: #9AA2BF; font-size: 14px;">⌕</span>
+      <input id="searchInput" placeholder="ค้นหาประเทศ / จังหวัด / ศูนย์…">
+    </div>
+
+    <div style="text-align: right;">
+      <div class="mono" id="countTotal" style="font-size: 23px; font-weight: 700; line-height: 1; color: #15276B;">—</div>
+      <div id="countSub" style="font-size: 11px; color: #6B7393; margin-top: 2px;">&nbsp;</div>
+    </div>
+  </header>
+
+  <!-- ===== MAP VIEW ===== -->
+  <div class="map-stage" id="mapView">
+    <div id="mapHost"></div>
+
+    <div class="loading" id="mapLoading">
+      <span class="spinner"></span>
+      <span class="mono">กำลังโหลดแผนที่…</span>
+    </div>
+    <div class="maperr" id="mapError" style="display: none;">[ แผนที่โหลดไม่สำเร็จ — ลองรีเฟรชหน้าอีกครั้ง ]</div>
+
+    <div class="hero" id="hero">
+      <div class="hero-eyebrow">— <span id="heroEyebrow"></span></div>
+      <h1 id="heroTitle"></h1>
+      <p id="heroSub"></p>
+    </div>
+
+    <div class="zoom-chip-wrap" id="zoomChipWrap" style="display: none;">
+      <button class="zoom-chip" id="zoomChip">← <span id="zoomCountry"></span><span class="mono">· ย่อแผนที่</span></button>
+    </div>
+
+    <div class="stairs" id="stairs"></div>
+
+    <div class="chips">
+      <button class="chip-toggle" id="btnEmpty"><span class="dot"></span> เฉพาะที่เคลื่อนไหวสูง</button>
+      <div class="legend">
+        <span class="lbl">ความเคลื่อนไหว</span>
+        <span class="it"><span class="sw" style="background: #F5821F; box-shadow: 0 0 10px 1px rgba(245,130,31,0.55);"></span> มาก</span>
+        <span class="it"><span class="sw" style="background: rgba(245,130,31,0.62);"></span> ปานกลาง</span>
+        <span class="it"><span class="sw" style="background: rgba(245,130,31,0.34);"></span> น้อย</span>
+      </div>
+    </div>
+
+    <div id="tooltip"><div class="tl"></div><div class="ts"></div></div>
+
+    <div id="panelHost"></div>
+    <div id="cpHost"></div>
+  </div>
+
+  <!-- ===== TEMPLE DETAIL VIEW ===== -->
+  <div id="templeView"></div>
+
+</div>
+
+<!-- ===== CLIP MODAL ===== -->
+<div id="clipHost"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var ACCENT = '#F5821F';
+
+  // ---------- STATE ----------
+  var state = {
+    mode: 'world', view: 'map', place: null, provSel: null, cPanel: null, search: '', onlyEmpty: false,
+    temple: null, cat: 'ทั้งหมด', clip: null, centerPopup: null,
+    mapW: 0, mapH: 0, geoReady: false, geoErr: false, hoverKey: null,
+  };
+
+  // ---------- DATA (โหลดจาก centers.json — สร้างด้วย scripts/build_centers_json.py) ----------
+  var DATA = null;      // centers.json ทั้งก้อน
+  var WORLD = [];       // ประเทศ (INTL) : { key, name, short, clips, centers, list }
+  var WORLD_BY_KEY = {};
+  var ATLAS_TO_KEY = {}; // ชื่อประเทศใน world-atlas -> key (ชื่อไทย)
+  var PROV = {};        // ชื่อจังหวัด (pro_th) -> { th, list }
+
+  // ชื่อไทย -> ชื่อใน world-atlas + รหัสสั้น (+ พิกัด fallback สำหรับประเทศเล็กที่ไม่มีใน atlas 110m)
+  var COUNTRY_INFO = {
+    'สหรัฐอเมริกา': { atlas: 'United States of America', short: 'USA' },
+    'อังกฤษ': { atlas: 'United Kingdom', short: 'UK' },
+    'ญี่ปุ่น': { atlas: 'Japan', short: 'JP' },
+    'ออสเตรเลีย': { atlas: 'Australia', short: 'AU' },
+    'นิวซีแลนด์': { atlas: 'New Zealand', short: 'NZ' },
+    'เยอรมนี': { atlas: 'Germany', short: 'DE' },
+    'แอฟริกาใต้': { atlas: 'South Africa', short: 'ZA' },
+    'จีน': { atlas: 'China', short: 'CN' },
+    'นอร์เวย์': { atlas: 'Norway', short: 'NO' },
+    'บรูไน': { atlas: 'Brunei', short: 'BN' },
+    'บาห์เรน': { atlas: null, short: 'BH', lonlat: [50.55, 26.07] },
+    'ฝรั่งเศส': { atlas: 'France', short: 'FR' },
+    'ฟิลิปปินส์': { atlas: 'Philippines', short: 'PH' },
+    'มองโกเลีย': { atlas: 'Mongolia', short: 'MN' },
+    'มอลตา': { atlas: null, short: 'MT', lonlat: [14.51, 35.90] },
+    'มาเลเซีย': { atlas: 'Malaysia', short: 'MY' },
+    'สวิตเซอร์แลนด์': { atlas: 'Switzerland', short: 'CH' },
+    'สวีเดน': { atlas: 'Sweden', short: 'SE' },
+    'สหรัฐอาหรับเอมิเรตส์': { atlas: 'United Arab Emirates', short: 'AE' },
+    'สิงคโปร์': { atlas: null, short: 'SG', lonlat: [103.82, 1.35] },
+    'หมู่เกาะโซโลมอน': { atlas: 'Solomon Is.', short: 'SB' },
+    'ออสเตรีย': { atlas: 'Austria', short: 'AT' },
+    'อิตาลี': { atlas: 'Italy', short: 'IT' },
+    'อินโดนีเซีย': { atlas: 'Indonesia', short: 'ID' },
+    'เกาหลีใต้': { atlas: 'South Korea', short: 'KR' },
+    'เดนมาร์ก': { atlas: 'Denmark', short: 'DK' },
+    'เนปาล': { atlas: 'Nepal', short: 'NP' },
+    'เบลเยียม': { atlas: 'Belgium', short: 'BE' },
+    'แคนาดา': { atlas: 'Canada', short: 'CA' },
+    'โอมาน': { atlas: 'Oman', short: 'OM' },
+    'ไต้หวัน': { atlas: 'Taiwan', short: 'TW' },
+  };
+
+  function buildIndexes() {
+    WORLD = []; WORLD_BY_KEY = {}; ATLAS_TO_KEY = {}; PROV = {};
+    var byCountry = {};
+    DATA.centers.forEach(function (c) {
+      if (c.scope === 'INTL') {
+        (byCountry[c.country] = byCountry[c.country] || []).push(c);
+      } else if (c.province) {
+        (PROV[c.province] = PROV[c.province] || { th: c.province, list: [] }).list.push(c);
+      }
+    });
+    Object.keys(byCountry).forEach(function (country) {
+      var list = byCountry[country].slice().sort(function (a, b) { return b.clips - a.clips; });
+      var info = COUNTRY_INFO[country] || { atlas: null, short: country.slice(0, 3) };
+      var entry = {
+        key: country, name: country, short: info.short, info: info,
+        clips: list.reduce(function (s, c) { return s + c.clips; }, 0),
+        centers: list.length, list: list,
+      };
+      WORLD.push(entry);
+      WORLD_BY_KEY[country] = entry;
+      if (info.atlas) ATLAS_TO_KEY[info.atlas] = country;
+    });
+    Object.keys(PROV).forEach(function (p) {
+      PROV[p].list.sort(function (a, b) { return b.clips - a.clips; });
+    });
+  }
+
+  // ---------- METRIC HELPERS ----------
+  function provMeta(rec) {
+    var clips = 0, actives = 0;
+    rec.list.forEach(function (c) { clips += c.clips; if (c.active === 'active') actives++; });
+    var tier = (clips >= 40 || actives >= 2) ? 'high' : (clips >= 18 || actives >= 1) ? 'mid' : 'low';
+    return { clips: clips, centers: rec.list.length, actives: actives, tier: tier };
+  }
+  function worldTier(clips) { return clips >= 50 ? 'high' : clips >= 25 ? 'mid' : 'low'; }
+  function centerTier(clips) { return clips >= 40 ? 'high' : clips >= 15 ? 'mid' : 'low'; }
+  function tierWord(tier) { return tier === 'high' ? 'สูง' : tier === 'mid' ? 'ปานกลาง' : 'น้อย'; }
+  function rampColor(tier, dim) {
+    if (tier === 'high') return dim ? 'rgba(245,130,31,0.20)' : ACCENT;
+    if (tier === 'mid') return dim ? 'rgba(245,130,31,0.15)' : 'rgba(245,130,31,0.62)';
+    return dim ? 'rgba(245,130,31,0.11)' : 'rgba(245,130,31,0.34)';
+  }
+
+  // ระดับความเคลื่อนไหวของศูนย์ — ใช้ active_level จริงจากเพจ ถ้าไม่มีให้ประเมินจากจำนวนคลิป
+  function centerLevel(c) {
+    if (c.active === 'active') return { word: 'สูง', tier: 'high' };
+    if (c.active === 'พอใช้') return { word: 'ปานกลาง', tier: 'mid' };
+    if (c.active === 'เงียบ' || c.active === 'ไม่มีเพจ') return { word: 'น้อย', tier: 'low' };
+    var t = centerTier(c.clips);
+    return { word: tierWord(t), tier: t };
+  }
+  function fmtLast(c) { return c.lastPost ? c.lastPost.replace(/(\D)(\d{4})$/, '$1 $2') : '—'; }
+  function latestActivity(c) {
+    if (c.videos && c.videos.length) return c.videos[0].t;
+    if (c.types && c.types.length) return c.types.join(' · ');
+    return 'ยังไม่มีคอนเทนต์ในคลัง';
+  }
+  function placeOf(c) { return c.scope === 'INTL' ? c.country : c.province; }
+  function scopeWord(c) { return c.scope === 'INTL' ? 'ต่างประเทศ' : 'ในประเทศ'; }
+  // หมวดเด่น: จากหมวดคลิปจริงที่จับคู่ได้ ถ้าไม่มีใช้ activity_types จากเพจ
+  function catBars(c, n) {
+    var keys = Object.keys(c.cats || {});
+    if (keys.length) {
+      var max = c.cats[keys[0]] || 1;
+      return keys.slice(0, n).map(function (k) {
+        return { name: k, w: Math.max(8, Math.round(c.cats[k] / max * 100)), count: c.cats[k] };
+      });
+    }
+    return (c.types || []).slice(0, n).map(function (t, i) {
+      return { name: t, w: [100, 74, 52, 38, 30, 24][i] || 20, count: null };
+    });
+  }
+
+  // ---------- DOM HELPERS ----------
+  function $(sel) { return document.querySelector(sel); }
+  function esc(s) { return ('' + s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  var SVGNS = 'http://www.w3.org/2000/svg';
+
+  var mapHost = $('#mapHost');
+  var tooltip = $('#tooltip');
+  var geo = null;       // { world, th }
+  var paths = null;     // { world: [], th: [], worldProj }
+  var mapRect = null;
+  var zoneCache = null;
+  var hitCtx = null;
+
+  // ---------- LOADING ----------
+  function measure(recompute) {
+    var r = mapHost.getBoundingClientRect();
+    mapRect = r;
+    var w = Math.round(r.width), h = Math.round(r.height);
+    if (w && h && (w !== state.mapW || h !== state.mapH)) {
+      state.mapW = w; state.mapH = h;
+      if (recompute && geo) { computeAll(); renderMapSvg(); }
+    }
+  }
+
+  function loadAll() {
+    return Promise.all([
+      fetch('centers.json').then(function (r) { return r.json(); }),
+      fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(function (r) { return r.json(); }),
+      fetch('https://cdn.jsdelivr.net/gh/chingchai/OpenGISData-Thailand@master/provinces.geojson').then(function (r) { return r.json(); }),
+    ]).then(function (res) {
+      DATA = res[0];
+      buildIndexes();
+      var world = topojson.feature(res[1], res[1].objects.countries);
+      geo = { world: world, th: res[2] };
+    });
+  }
+
+  function computeAll() {
+    if (!window.d3 || !geo) return;
+    var w = state.mapW || (mapRect && mapRect.width) || 800;
+    var h = state.mapH || (mapRect && mapRect.height) || 600;
+    paths = { world: [], th: [], worldProj: null };
+    try {
+      var fcW = geo.world;
+      var projW = d3.geoNaturalEarth1().fitExtent([[10, 210], [w - 10, h - 10]], fcW);
+      var pathW = d3.geoPath(projW);
+      paths.worldProj = projW;
+      paths.world = fcW.features.map(function (f, i) {
+        var pr = f.properties || {};
+        var nm = pr.name || pr.NAME || pr.NAME_EN || '';
+        return { id: 'w' + i, d: pathW(f) || '', key: ATLAS_TO_KEY[nm] || null, name: nm, centroid: pathW.centroid(f), bounds: pathW.bounds(f) };
+      });
+    } catch (e) {}
+    try {
+      var fcT = geo.th;
+      var projT = d3.geoMercator().fitExtent([[14, 200], [w - 14, h - 24]], fcT);
+      var pathT = d3.geoPath(projT);
+      paths.th = fcT.features.map(function (f, i) {
+        var pr = f.properties || {};
+        var th = pr.pro_th || pr.ADM1_TH || pr.name_th || pr.PROV_NAMT || '';
+        var en = pr.pro_en || pr.ADM1_EN || pr.NAME_1 || pr.name_en || pr.name || '';
+        return { id: 't' + i, d: pathT(f) || '', key: th, en: en, th: th, centroid: pathT.centroid(f) };
+      });
+    } catch (e) {}
+  }
+
+  // compute simulated, in-country center positions for the zoomed country (cached)
+  function zoomLayout(selPath, list, w, h, placeKey) {
+    var ckey = placeKey + '_' + Math.round(w) + 'x' + Math.round(h) + '_' + list.length;
+    if (zoneCache && zoneCache.key === ckey) return zoneCache;
+    var bx0 = selPath.bounds[0][0], by0 = selPath.bounds[0][1], bx1 = selPath.bounds[1][0], by1 = selPath.bounds[1][1];
+    var fullScale = Math.max(bx1 - bx0, by1 - by0);
+    var ctx = hitCtx || (hitCtx = document.createElement('canvas').getContext('2d'));
+    var p2d = null; try { p2d = new Path2D(selPath.d); } catch (e) {}
+    var inside = function (x, y) { return p2d ? ctx.isPointInPath(p2d, x, y) : true; };
+    var step = Math.max(fullScale / 34, 2);
+    var cand = [];
+    for (var gy = by0; gy <= by1; gy += step) for (var gx = bx0; gx <= bx1; gx += step) { if (inside(gx, gy)) cand.push([gx, gy]); }
+    // focus on the main landmass: trim far-flung outliers (e.g. Alaska/Hawaii)
+    var fx0 = bx0, fy0 = by0, fx1 = bx1, fy1 = by1;
+    if (cand.length > 12) {
+      var xs = cand.map(function (c) { return c[0]; }).sort(function (a, b) { return a - b; });
+      var ys = cand.map(function (c) { return c[1]; }).sort(function (a, b) { return a - b; });
+      var q = function (a, p) { return a[Math.min(a.length - 1, Math.max(0, Math.floor(a.length * p)))]; };
+      var tx0 = q(xs, 0.06), tx1 = q(xs, 0.94), ty0 = q(ys, 0.06), ty1 = q(ys, 0.94);
+      var trimmed = cand.filter(function (c) { return c[0] >= tx0 && c[0] <= tx1 && c[1] >= ty0 && c[1] <= ty1; });
+      if (trimmed.length >= list.length) { cand = trimmed; fx0 = tx0; fy0 = ty0; fx1 = tx1; fy1 = ty1; }
+    }
+    var scale = Math.max(fx1 - fx0, fy1 - fy0) || fullScale;
+    cand.sort(function (a, b) {
+      var fa = Math.sin(a[0] * 12.9898 + a[1] * 78.233); var fb = Math.sin(b[0] * 12.9898 + b[1] * 78.233);
+      return (fa - Math.floor(fa)) - (fb - Math.floor(fb));
+    });
+    var pos = [];
+    var md = scale * 0.24;
+    while (pos.length < list.length && md > scale * 0.001) {
+      pos = [];
+      for (var i = 0; i < cand.length; i++) {
+        var c = cand[i];
+        if (pos.length >= list.length) break;
+        var ok = pos.every(function (p) { return (p[0] - c[0]) * (p[0] - c[0]) + (p[1] - c[1]) * (p[1] - c[1]) > md * md; });
+        if (ok) pos.push(c);
+      }
+      if (pos.length < list.length) md *= 0.72;
+    }
+    while (pos.length < list.length) pos.push(selPath.centroid || [(fx0 + fx1) / 2, (fy0 + fy1) / 2]);
+    zoneCache = { key: ckey, pos: pos, focus: [fx0, fy0, fx1, fy1], scale: scale };
+    return zoneCache;
+  }
+
+  // ---------- HOVER ----------
+  function onHover(p, e, isWorld) {
+    var label = '', sub = '';
+    if (isWorld) {
+      var c = p.key ? WORLD_BY_KEY[p.key] : null;
+      label = c ? c.name : (p.name || '');
+      sub = c ? (c.centers + ' ศูนย์ · เคลื่อนไหว ' + tierWord(worldTier(c.clips))) : 'ไม่มีศูนย์ในเครือข่าย';
+    } else {
+      var rec = p.key ? PROV[p.key] : null;
+      label = p.th || p.en || '';
+      if (rec) { var m = provMeta(rec); sub = m.centers + ' ศูนย์ · เคลื่อนไหว ' + tierWord(m.tier); }
+      else sub = 'ไม่มีศูนย์ในจังหวัดนี้';
+    }
+    var x = mapRect ? (e.clientX - mapRect.left) : 0;
+    var y = mapRect ? (e.clientY - mapRect.top) : 0;
+    state.hoverKey = p.id;
+    tooltip.querySelector('.tl').textContent = label;
+    tooltip.querySelector('.ts').textContent = sub;
+    tooltip.style.left = x + 'px';
+    tooltip.style.top = y + 'px';
+    tooltip.style.display = 'block';
+  }
+  function clearHover() { state.hoverKey = null; tooltip.style.display = 'none'; }
+
+  // shape fill/stroke per state
+  function shapeStyle(p, hovered, zScale) {
+    var fill = 'rgba(255,255,255,0.035)', stroke = 'rgba(255,255,255,0.20)', sw = 0.5, clickable = false;
+    if (state.mode === 'world') {
+      var c = p.key ? WORLD_BY_KEY[p.key] : null;
+      if (c) {
+        clickable = true;
+        var sel = state.place === p.key;
+        fill = sel ? 'rgba(245,130,31,0.30)' : (hovered ? 'rgba(245,130,31,0.22)' : 'rgba(245,130,31,0.12)');
+        if (sel) { stroke = 'rgba(245,130,31,0.9)'; sw = zScale ? Math.max(0.4, zScale * 0.003) : 1; }
+      }
+    } else {
+      var rec = p.key ? PROV[p.key] : null;
+      if (rec) {
+        var tier = provMeta(rec).tier;
+        var selP = state.provSel && state.provSel.key === p.key;
+        var dim = state.onlyEmpty && tier !== 'high';
+        fill = rampColor(tier, dim);
+        clickable = true;
+        if (selP || hovered) { stroke = 'rgba(255,255,255,0.95)'; sw = 1.3; }
+      } else {
+        fill = 'rgba(255,255,255,0.05)';
+        clickable = true;
+        if (hovered) { stroke = 'rgba(255,255,255,0.7)'; sw = 1; }
+      }
+    }
+    return { fill: fill, stroke: stroke, sw: sw, clickable: clickable };
+  }
+
+  // ---------- MAP RENDER ----------
+  function renderMapSvg() {
+    mapHost.innerHTML = '';
+    if (!state.geoReady || !paths) return;
+    var isWorld = state.mode === 'world';
+    var w = state.mapW, h = state.mapH;
+    var arr = isWorld ? paths.world : paths.th;
+    if (!arr || !arr.length || !w || !h) return;
+
+    var selPath = (isWorld && state.place) ? arr.find(function (p) { return p.key === state.place && p.bounds && isFinite(p.bounds[0][0]); }) : null;
+    var zoomCountry = selPath ? WORLD_BY_KEY[state.place] : null;
+    var zoomList = (zoomCountry && zoomCountry.list) ? zoomCountry.list : [];
+    var zoom = selPath ? zoomLayout(selPath, zoomList, w, h, state.place) : null;
+    var zScale = zoom ? zoom.scale : 0;
+
+    var svg = document.createElementNS(SVGNS, 'svg');
+    var viewBox = '0 0 ' + w + ' ' + h;
+    if (selPath && zoom) {
+      var f = zoom.focus;
+      var pad = zoom.scale * 0.16;
+      viewBox = (f[0] - pad) + ' ' + (f[1] - pad) + ' ' + ((f[2] - f[0]) + 2 * pad) + ' ' + ((f[3] - f[1]) + 2 * pad);
+    }
+    svg.setAttribute('viewBox', viewBox);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', '100%');
+
+    var gShapes = document.createElementNS(SVGNS, 'g');
+    arr.forEach(function (p) {
+      var st = shapeStyle(p, false, zScale);
+      var el = document.createElementNS(SVGNS, 'path');
+      el.setAttribute('d', p.d);
+      el.setAttribute('fill', st.fill);
+      el.setAttribute('stroke', st.stroke);
+      el.setAttribute('stroke-width', st.sw);
+      el.style.cursor = st.clickable ? 'pointer' : 'default';
+      el.style.transition = 'fill 0.15s ease, stroke 0.15s ease';
+      el.addEventListener('mouseenter', function (e) {
+        onHover(p, e, isWorld);
+        var hs = shapeStyle(p, true, zScale);
+        el.setAttribute('fill', hs.fill); el.setAttribute('stroke', hs.stroke); el.setAttribute('stroke-width', hs.sw);
+      });
+      el.addEventListener('mouseleave', function () {
+        clearHover();
+        var bs = shapeStyle(p, false, zScale);
+        el.setAttribute('fill', bs.fill); el.setAttribute('stroke', bs.stroke); el.setAttribute('stroke-width', bs.sw);
+      });
+      if (st.clickable) {
+        el.addEventListener('click', function () {
+          if (isWorld) togglePlace(p.key); else selectProvince(p.th);
+        });
+      }
+      gShapes.appendChild(el);
+    });
+    svg.appendChild(gShapes);
+
+    var gPins = document.createElementNS(SVGNS, 'g');
+    if (selPath && zoom) {
+      // ZOOMED INTO A COUNTRY — simulated positions kept inside the outline (ยังไม่มี lat/lng จริงของศูนย์)
+      var scale = zoom.scale;
+      var r = Math.max(2, scale * 0.016);
+      var fs = scale * 0.025;
+      zoomList.forEach(function (c, idx) {
+        var cx = zoom.pos[idx][0], cy = zoom.pos[idx][1];
+        var lv = centerLevel(c);
+        var col = rampColor(lv.tier, false);
+        var g = document.createElementNS(SVGNS, 'g');
+        g.style.cursor = 'pointer';
+        var o = document.createElementNS(SVGNS, 'circle');
+        o.setAttribute('cx', cx); o.setAttribute('cy', cy); o.setAttribute('r', r + scale * 0.01);
+        o.setAttribute('fill', 'rgba(245,130,31,0.18)');
+        g.appendChild(o);
+        var ci = document.createElementNS(SVGNS, 'circle');
+        ci.setAttribute('cx', cx); ci.setAttribute('cy', cy); ci.setAttribute('r', r);
+        ci.setAttribute('fill', col); ci.setAttribute('stroke', '#0C1A4A'); ci.setAttribute('stroke-width', scale * 0.0028);
+        g.appendChild(ci);
+        var t = document.createElementNS(SVGNS, 'text');
+        t.setAttribute('x', cx + r * 1.7); t.setAttribute('y', cy + fs * 0.34);
+        t.setAttribute('font-size', fs); t.setAttribute('fill', '#fff');
+        t.style.fontWeight = '700'; t.style.paintOrder = 'stroke';
+        t.style.stroke = 'rgba(8,16,46,0.9)'; t.style.strokeWidth = (scale * 0.0062) + 'px'; t.style.strokeLinejoin = 'round';
+        t.textContent = c.en || c.name;
+        g.appendChild(t);
+        g.addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          showCenter(c);
+        });
+        gPins.appendChild(g);
+      });
+    } else if (isWorld) {
+      var pinFor = function (entry, cx, cy) {
+        var tier = worldTier(entry.clips);
+        if (state.onlyEmpty && tier !== 'high') return null;
+        var r = tier === 'high' ? 6.5 : tier === 'mid' ? 5 : 4;
+        var col = rampColor(tier, false);
+        var glow = tier === 'high' ? 0.22 : tier === 'mid' ? 0.15 : 0.10;
+        var sel = state.place === entry.key;
+        var g = document.createElementNS(SVGNS, 'g');
+        g.style.cursor = 'pointer';
+        var o = document.createElementNS(SVGNS, 'circle');
+        o.setAttribute('cx', cx); o.setAttribute('cy', cy); o.setAttribute('r', r + 5);
+        o.setAttribute('fill', 'rgba(245,130,31,' + glow + ')');
+        g.appendChild(o);
+        var ci = document.createElementNS(SVGNS, 'circle');
+        ci.setAttribute('cx', cx); ci.setAttribute('cy', cy); ci.setAttribute('r', r);
+        ci.setAttribute('fill', col); ci.setAttribute('stroke', '#0C1A4A'); ci.setAttribute('stroke-width', 0.6);
+        g.appendChild(ci);
+        if (sel) {
+          var s = document.createElementNS(SVGNS, 'circle');
+          s.setAttribute('cx', cx); s.setAttribute('cy', cy); s.setAttribute('r', r + 9);
+          s.setAttribute('fill', 'none'); s.setAttribute('stroke', ACCENT); s.setAttribute('stroke-width', 1.5);
+          g.appendChild(s);
+        }
+        if (tier !== 'low') {
+          var t = document.createElementNS(SVGNS, 'text');
+          t.setAttribute('x', cx + r + 4); t.setAttribute('y', cy + 4);
+          t.setAttribute('font-size', 11); t.setAttribute('fill', '#fff');
+          t.style.fontWeight = '700'; t.style.paintOrder = 'stroke';
+          t.style.stroke = 'rgba(8,16,46,0.75)'; t.style.strokeWidth = '3px'; t.style.strokeLinejoin = 'round';
+          t.textContent = entry.short + ' · ' + entry.clips;
+          g.appendChild(t);
+        }
+        g.addEventListener('click', function () { togglePlace(entry.key); });
+        return g;
+      };
+      var pinned = {};
+      arr.forEach(function (p) {
+        if (!(p.key && WORLD_BY_KEY[p.key] && p.centroid && isFinite(p.centroid[0]))) return;
+        if (pinned[p.key]) return;
+        var g = pinFor(WORLD_BY_KEY[p.key], p.centroid[0], p.centroid[1]);
+        if (!g) return;
+        pinned[p.key] = true;
+        g.addEventListener('mouseenter', function (e) { onHover(p, e, true); });
+        g.addEventListener('mouseleave', function () { clearHover(); });
+        gPins.appendChild(g);
+      });
+      // ประเทศเล็กที่ไม่มี outline ใน atlas 110m (สิงคโปร์ / มอลตา / บาห์เรน) — ปักหมุดจากพิกัด
+      WORLD.forEach(function (entry) {
+        if (pinned[entry.key] || !entry.info.lonlat || !paths.worldProj) return;
+        var xy = paths.worldProj(entry.info.lonlat);
+        if (!xy || !isFinite(xy[0])) return;
+        var g = pinFor(entry, xy[0], xy[1]);
+        if (!g) return;
+        pinned[entry.key] = true;
+        var fake = { id: 'x' + entry.key, key: entry.key, name: entry.name };
+        g.addEventListener('mouseenter', function (e) { onHover(fake, e, true); });
+        g.addEventListener('mouseleave', function () { clearHover(); });
+        gPins.appendChild(g);
+      });
+    }
+    svg.appendChild(gPins);
+    mapHost.appendChild(svg);
+  }
+
+  // ---------- ACTIONS ----------
+  function setMode(m) {
+    state.mode = m; state.place = null; state.provSel = null; state.cPanel = null; state.search = '';
+    $('#searchInput').value = '';
+    clearHover();
+    render();
+  }
+  function goHome() { state.view = 'map'; state.place = null; state.provSel = null; state.cPanel = null; state.clip = null; render(); }
+  function togglePlace(key) {
+    var entry = WORLD_BY_KEY[key];
+    var hasOutline = entry && entry.info.atlas;
+    if (!hasOutline) {
+      // ไม่มี outline ให้ซูม — เปิด panel รายชื่อศูนย์แทน
+      state.cPanel = state.cPanel === key ? null : key;
+      state.place = null; state.provSel = null;
+    } else {
+      state.place = state.place === key ? null : key;
+      state.provSel = null; state.cPanel = null;
+    }
+    render();
+  }
+  function selectProvince(th) { state.provSel = { key: th, th: th }; state.place = null; state.cPanel = null; render(); }
+  function openCenter(c) { state.view = 'temple'; state.cat = 'ทั้งหมด'; state.temple = c; state.centerPopup = null; render(); }
+  function showCenter(c) { state.centerPopup = c; render(); }
+
+  // ---------- SEARCH (Enter เพื่อกระโดดไปประเทศ / จังหวัด / ศูนย์) ----------
+  function doSearch() {
+    var q = state.search.trim();
+    if (!q) return;
+    var ql = q.toLowerCase();
+    if (state.mode === 'world') {
+      var country = WORLD.find(function (w) { return w.name.indexOf(q) !== -1 || w.short.toLowerCase() === ql; });
+      if (country) { togglePlace(country.key); return; }
+    } else {
+      var prov = Object.keys(PROV).find(function (p) { return p.indexOf(q) !== -1; });
+      if (prov) { selectProvince(prov); return; }
+    }
+    var scope = state.mode === 'world' ? 'INTL' : 'TH';
+    var center = DATA.centers.find(function (c) {
+      return c.scope === scope && (c.name.indexOf(q) !== -1 || (c.en && c.en.toLowerCase().indexOf(ql) !== -1));
+    }) || DATA.centers.find(function (c) {
+      return c.name.indexOf(q) !== -1 || (c.en && c.en.toLowerCase().indexOf(ql) !== -1);
+    });
+    if (center) showCenter(center);
+  }
+
+  // ---------- RENDER: OVERLAYS ----------
+  function renderOverlays() {
+    var isWorld = state.mode === 'world';
+    var zoomed = isWorld && !!state.place;
+
+    $('#hero').style.display = zoomed ? 'none' : 'block';
+    $('#heroEyebrow').textContent = isWorld ? 'เครือข่ายวัดทั่วโลก' : 'เครือข่ายวัดในไทย';
+    if (DATA) {
+      $('#heroTitle').textContent = isWorld
+        ? 'วัดละเรื่องที่คุณไม่เคยรู้ — รอบโลก'
+        : DATA.counts.th + ' ศูนย์ · 77 จังหวัด';
+    }
+    $('#heroSub').textContent = isWorld
+      ? 'แตะประเทศหรือหมุดเพื่อดูศูนย์และความเคลื่อนไหวในแต่ละกิจกรรม'
+      : 'แตะจังหวัดเพื่อดูศูนย์และความเคลื่อนไหวรายกิจกรรม · ยิ่งเข้ม = ยิ่ง active';
+
+    $('#zoomChipWrap').style.display = zoomed ? 'block' : 'none';
+    if (zoomed) $('#zoomCountry').textContent = state.place;
+
+    // staircase cards — ศูนย์ที่เพิ่งเคลื่อนไหวล่าสุด (จาก last_post จริงบนเพจ)
+    var stairs = $('#stairs');
+    stairs.style.display = zoomed ? 'none' : 'flex';
+    stairs.innerHTML = '';
+    if (!zoomed && DATA) {
+      var scope = isWorld ? 'INTL' : 'TH';
+      var pool = DATA.centers.filter(function (c) {
+        return c.scope === scope && (c.lastTs || c.clips > 0);
+      });
+      pool.sort(function (a, b) { return (b.lastTs || 0) - (a.lastTs || 0) || b.clips - a.clips; });
+      pool.slice(0, 4).forEach(function (c, i) {
+        var sel = isWorld ? (state.place === c.country) : (state.provSel && state.provSel.key === c.province);
+        var btn = document.createElement('button');
+        btn.className = 'stair-card';
+        btn.style.marginTop = ((3 - i) * 24) + 'px';
+        if (sel) { btn.style.borderColor = ACCENT; btn.style.background = 'rgba(245,130,31,0.20)'; }
+        var last = c.lastPost ? ('เคลื่อนไหวล่าสุด · ' + fmtLast(c)) : (c.clips + ' คลิปในคลัง');
+        btn.innerHTML = '<div class="nm">' + esc(c.name) + '</div>' +
+          '<div class="act">' + esc(latestActivity(c)) + '</div>' +
+          '<div class="last">' + esc(last) + '</div>';
+        btn.addEventListener('click', function () { openCenter(c); });
+        stairs.appendChild(btn);
+      });
+    }
+
+    $('#btnEmpty').classList.toggle('on', state.onlyEmpty);
+  }
+
+  // ---------- RENDER: PANEL (จังหวัด หรือ ประเทศที่ไม่มี outline) ----------
+  function renderPanel() {
+    var host = $('#panelHost');
+    var rec = null, title = '', isProv = false;
+    if (state.mode === 'th' && state.provSel) {
+      rec = PROV[state.provSel.key] || null;
+      title = state.provSel.th;
+      isProv = true;
+    } else if (state.mode === 'world' && state.cPanel) {
+      var entry = WORLD_BY_KEY[state.cPanel];
+      rec = entry ? { list: entry.list } : null;
+      title = state.cPanel;
+    } else {
+      host.innerHTML = '';
+      return;
+    }
+    var html = '<div class="panel"><div class="panel-bar"></div>' +
+      '<div class="panel-head">' +
+      '<button class="panel-close" id="panelClose">✕ ปิด</button>' +
+      '<h2>' + esc(title) + '</h2>';
+    if (rec && rec.list.length) {
+      var clips = rec.list.reduce(function (s, c) { return s + c.clips; }, 0);
+      html += '<div class="panel-sub">' + rec.list.length + ' ศูนย์ · ' + clips + ' คอนเทนต์ · เรียงตามความเคลื่อนไหว</div></div>' +
+        '<div class="panel-body">' +
+        '<div class="panel-sec">ศูนย์ที่เคลื่อนไหวมากสุด</div>';
+      var max = Math.max.apply(null, rec.list.map(function (x) { return x.clips || 1; }));
+      rec.list.forEach(function (c, i) {
+        var rk = (i + 1 < 10 ? '0' : '') + (i + 1);
+        var bw = Math.round((c.clips || 0) / max * 100);
+        var sub = c.en || (c.active ? 'เพจ ' + c.active : '') || '';
+        html += '<button class="center-row" data-i="' + i + '">' +
+          '<span class="rk">' + rk + '</span>' +
+          '<span class="dt" style="background: ' + rampColor(centerLevel(c).tier, false) + ';"></span>' +
+          '<span class="mid"><span class="nm">' + esc(c.name) + '</span><span class="en">' + esc(sub) + '</span></span>' +
+          '<span class="rt"><span class="bar"><span style="width: ' + bw + '%;"></span></span>' +
+          '<span class="ct">' + c.clips + '</span></span></button>';
+      });
+      html += '</div></div>';
+    } else {
+      html += '<div class="panel-sub">ไม่มีศูนย์ใน' + (isProv ? 'จังหวัดนี้' : 'ประเทศนี้') + '</div></div>' +
+        '<div class="panel-body">' +
+        '<div class="panel-empty"><div class="empty-circle"></div>' +
+        '<div class="tt">ยังไม่มีศูนย์ใน' + (isProv ? 'จังหวัดนี้' : 'ประเทศนี้') + '</div>' +
+        '<p>' + (isProv ? 'จังหวัดนี้' : 'ประเทศนี้') + 'ยังไม่มีศูนย์ในเครือข่าย หรือยังไม่มีข้อมูลความเคลื่อนไหวบนเพจ</p>' +
+        '<button class="btn-navy">＋ เสนอเป็นคิวถ่าย</button></div></div>';
+    }
+    host.innerHTML = html;
+    $('#panelClose').addEventListener('click', function () { state.place = null; state.provSel = null; state.cPanel = null; render(); });
+    if (rec && rec.list.length) {
+      host.querySelectorAll('.center-row').forEach(function (row) {
+        row.addEventListener('click', function () { openCenter(rec.list[+row.dataset.i]); });
+      });
+    }
+  }
+
+  // ---------- RENDER: CENTER DETAIL POPUP ----------
+  function renderCenterPopup() {
+    var host = $('#cpHost');
+    var c = state.centerPopup;
+    if (!c) { host.innerHTML = ''; return; }
+    var lv = centerLevel(c);
+    var meta = [c.en, placeOf(c)].filter(Boolean).join(' · ');
+    var bars = catBars(c, 3);
+    var html = '<div class="cp-overlay" id="cpOverlay"><div class="cp" id="cpBox">' +
+      '<div class="cp-bar"></div>' +
+      '<div class="cp-head"><div class="cp-head-row"><div style="flex: 1; min-width: 0;">' +
+      '<div class="eyebrow-line"><span class="eyebrow-dash"></span><span class="eyebrow-txt">' + esc(scopeWord(c)) + '</span></div>' +
+      '<h2>' + esc(c.name) + '</h2>' +
+      '<div class="cp-meta">' + esc(meta) + '</div></div>' +
+      '<button class="cp-x" id="cpClose">✕</button></div>' +
+      '<span class="act-badge" style="background: ' + rampColor(lv.tier, false) + ';"><span class="wdot"></span> เคลื่อนไหว' + esc(lv.word) + '</span></div>' +
+      '<div class="cp-stats">' +
+      '<div class="stat"><div class="v">' + esc(c.followers || '—') + '</div><div class="l">ผู้ติดตามเพจ</div></div>' +
+      '<div class="stat"><div class="v">' + c.clips + '</div><div class="l">คอนเทนต์</div></div>' +
+      '<div class="stat"><div class="v">' + c.news4y + '</div><div class="l">ข่าว 4 ปี</div></div></div>' +
+      '<div class="cp-sec"><div class="sec-lbl">กิจกรรมล่าสุด</div>' +
+      '<div class="cp-activity">' + esc(latestActivity(c)) + '</div>' +
+      '<div class="cp-last">เคลื่อนไหวล่าสุด · ' + esc(fmtLast(c)) + '</div></div>';
+    if (bars.length) {
+      html += '<div class="cp-sec"><div class="sec-lbl" style="margin-bottom: 9px;">หมวดเด่น</div>';
+      bars.forEach(function (a) {
+        html += '<div class="cat-row"><span class="nm">' + esc(a.name) + '</span>' +
+          '<span class="bar"><span style="width: ' + a.w + '%;"></span></span></div>';
+      });
+      html += '</div>';
+    }
+    html += '<div class="cp-foot"><button class="btn-full" id="cpFull">ดูคอนเทนต์ &amp; ข้อมูลทั้งหมด →</button></div>' +
+      '</div></div>';
+    host.innerHTML = html;
+    $('#cpOverlay').addEventListener('click', function () { state.centerPopup = null; render(); });
+    $('#cpBox').addEventListener('click', function (e) { e.stopPropagation(); });
+    $('#cpClose').addEventListener('click', function () { state.centerPopup = null; render(); });
+    $('#cpFull').addEventListener('click', function () { openCenter(c); });
+  }
+
+  // ---------- RENDER: TEMPLE VIEW ----------
+  function renderTemple() {
+    var host = $('#templeView');
+    var c = state.temple;
+    if (!c) { host.innerHTML = ''; return; }
+    var lv = centerLevel(c);
+    var allClips = c.videos || [];
+    var filtered = state.cat === 'ทั้งหมด' ? allClips : allClips.filter(function (v) { return v.c === state.cat; });
+    var meta = [c.en, placeOf(c), c.scope === 'TH' ? 'ภาค' + c.region : c.region].filter(Boolean).join(' · ');
+    var bars = catBars(c, 8);
+    var chipCats = ['ทั้งหมด'];
+    allClips.forEach(function (v) { if (v.c && chipCats.indexOf(v.c) === -1) chipCats.push(v.c); });
+
+    var html = '<div class="temple-wrap">' +
+      '<button class="crumb" id="templeBack">← กลับไปแผนที่</button>' +
+      '<div class="temple-head"><div class="temple-head-l">' +
+      '<div class="eyebrow-line"><span class="eyebrow-dash"></span><span class="eyebrow-txt">เครือวัดพระธรรมกาย</span></div>' +
+      '<h1>' + esc(c.name) + '</h1>' +
+      '<div class="temple-meta">' + esc(meta) + '</div>' +
+      '<div class="temple-stats">' +
+      '<div class="tstat"><div class="v">' + esc(c.followers || '—') + '</div><div class="l">ผู้ติดตามเพจ</div></div>' +
+      '<div class="tstat"><div class="v">' + c.news4y + '</div><div class="l">ข่าวบนเพจ 4 ปี</div></div>' +
+      '<div class="tstat"><div class="v">' + c.clips + '</div><div class="l">คอนเทนต์ในคลัง</div></div>' +
+      '<div class="tstat"><div class="vt">' + esc(fmtLast(c)) + '</div><div class="l" style="margin-top: 4px;">อัปเดตล่าสุด</div></div>' +
+      '</div></div>' +
+      '<div class="temple-head-r">' +
+      '<span class="act-badge-lg" style="background: ' + rampColor(lv.tier, false) + ';"><span class="wdot"></span> เคลื่อนไหว' + esc(lv.word) + '</span>' +
+      (c.fb ? '<a class="fb-link" href="' + esc(c.fb) + '" target="_blank" rel="noopener">f · เพจ Facebook ↗</a>' : '') +
+      '</div></div>' +
+
+      '<div class="story"><div class="story-edge"></div><div class="story-body">' +
+      '<div class="story-eyebrow">★ เรื่องเล่า · เรื่องที่คุณไม่เคยรู้</div>' +
+      '<h2>' + esc('เรื่องที่คุณไม่เคยรู้: ' + c.name) + '</h2>' +
+      '<p>' + esc('ศูนย์แห่งนี้ตั้งอยู่ที่ ' + (placeOf(c) || c.country) + ' เป็นหนึ่งในเครือข่ายวัดที่บันทึกกิจกรรมงานบุญไว้อย่างต่อเนื่อง\n\n[ เรื่องเล่าฉบับเต็มอยู่ระหว่างการเรียบเรียงโดยทีมงาน — ดึงคลิปที่เกี่ยวข้องมาประกอบเป็นเรื่องราว ]') + '</p></div></div>' +
+
+      '<div class="actcard"><div class="actcard-head">' +
+      '<h3>ความเคลื่อนไหวรายกิจกรรม</h3>' +
+      '<span class="actcard-note">' + (Object.keys(c.cats || {}).length ? 'จากคลังคลิป BOON NEWS · 4,000 คลิปล่าสุด' : 'จากประเภทกิจกรรมบนเพจ Facebook') + '</span></div>';
+    if (bars.length) {
+      html += '<div class="actgrid">';
+      bars.forEach(function (a) {
+        html += '<div class="actrow"><span class="nm">' + esc(a.name) + '</span>' +
+          '<span class="bar"><span style="width: ' + a.w + '%;"></span></span>' +
+          '<span class="ps">' + (a.count !== null ? a.count + ' คลิป' : '—') + '</span></div>';
+      });
+      html += '</div>';
+    } else {
+      html += '<div class="none">ยังไม่มีข้อมูลกิจกรรมของศูนย์นี้ — ยังไม่มีคลิปที่จับคู่ได้ และไม่มีข้อมูลจากเพจ</div>';
+    }
+    html += '</div>' +
+
+      '<div class="clips-layout"><div>' +
+      '<div class="clips-head"><h3>คอนเทนต์ในคลัง · ' + c.clips + (c.clips > allClips.length && allClips.length ? ' (แสดง ' + allClips.length + ' รายการล่าสุด)' : '') + '</h3></div>';
+    if (allClips.length) {
+      html += '<div class="cat-chips">';
+      chipCats.forEach(function (name) {
+        html += '<button class="cat-chip' + (state.cat === name ? ' on' : '') + '" data-cat="' + esc(name) + '">' + esc(name) + '</button>';
+      });
+      html += '</div>';
+    }
+    if (filtered.length) {
+      html += '<div class="clip-grid">';
+      filtered.forEach(function (v, i) {
+        html += '<button class="clip-card" data-clip="' + i + '">' +
+          '<div class="clip-thumb"><span class="clip-play">▶</span>' +
+          '<span class="clip-dur">' + esc(v.d) + '</span></div>' +
+          '<div class="clip-info"><div class="clip-title">' + esc(v.t) + '</div>' +
+          '<div class="clip-row"><span class="clip-cat">' + esc(v.c) + '</span></div></div></button>';
+      });
+      html += '</div>';
+    } else {
+      html += '<div class="no-clips"><div class="circle"></div>' +
+        '<div class="tt">' + (allClips.length ? 'ยังไม่มีคลิปในหมวดนี้' : 'ยังไม่มีคลิปของศูนย์นี้ในคลัง') + '</div>' +
+        '<div class="nt">' + (allClips.length ? 'ลองเลือกหมวดอื่น หรือเสนอเป็นคิวถ่าย' : 'ศูนย์นี้ยังเป็น "หมุดว่าง" — เสนอเป็นคิวถ่ายได้เลย') + '</div></div>';
+    }
+    html += '</div>' +
+
+      '<div><div class="side-map"><div class="lbl">[ ที่ตั้งศูนย์ ]</div><span class="pin"></span></div>' +
+      '<div class="side-facts">' +
+      '<div><span class="k">ขอบเขต</span><b>' + esc(scopeWord(c)) + '</b></div>' +
+      '<div><span class="k">ที่ตั้ง</span><b>' + esc([placeOf(c), c.scope === 'TH' ? 'ภาค' + c.region : c.region].filter(Boolean).join(' · ')) + '</b></div>' +
+      '<div><span class="k">สังกัด</span><b>ธรรมกาย</b></div>' +
+      '<div><span class="k">ส่งข่าวบุญนิวส์</span><b class="' + (c.boonnews === 'ส่ง' ? 'ok' : '') + '">' + esc(c.boonnews || '—') + '</b></div>' +
+      '<div><span class="k">ยืนยัน FB</span><b class="' + (c.fbc === 'high' ? 'ok' : '') + '">' + esc(c.fbc === 'high' ? 'high ✓' : (c.fbc && c.fbc !== 'none' ? c.fbc : '—')) + '</b></div>' +
+      '</div></div></div></div>';
+
+    host.innerHTML = html;
+    $('#templeBack').addEventListener('click', function () { state.view = 'map'; state.clip = null; render(); });
+    host.querySelectorAll('.cat-chip').forEach(function (chip) {
+      chip.addEventListener('click', function () { state.cat = chip.dataset.cat; render(); });
+    });
+    host.querySelectorAll('.clip-card').forEach(function (card) {
+      card.addEventListener('click', function () { state.clip = filtered[+card.dataset.clip]; render(); });
+    });
+  }
+
+  // ---------- RENDER: CLIP MODAL ----------
+  function renderClipModal() {
+    var host = $('#clipHost');
+    var clip = state.clip;
+    if (!clip) { host.innerHTML = ''; return; }
+    host.innerHTML = '<div class="clip-overlay" id="clipOverlay"><div class="clip-modal" id="clipModal">' +
+      '<a class="clip-player" href="' + esc(clip.u) + '" target="_blank" rel="noopener" style="text-decoration: none;"><span class="play">▶</span>' +
+      '<span class="ph">[ เปิดวิดีโอบน YouTube ]</span></a>' +
+      '<div class="clip-modal-body"><h3>' + esc(clip.t) + '</h3>' +
+      '<div class="clip-modal-meta"><span>' + esc(clip.c) + '</span><span>·</span><span>' + esc(clip.d) + '</span></div>' +
+      '<div class="clip-modal-btns"><a class="btn-accent" href="' + esc(clip.u) + '" target="_blank" rel="noopener">เปิดบน YouTube ↗</a>' +
+      '<button class="btn-ghost" id="clipClose">ปิด</button></div></div></div></div>';
+    $('#clipOverlay').addEventListener('click', function () { state.clip = null; render(); });
+    $('#clipModal').addEventListener('click', function (e) { e.stopPropagation(); });
+    $('#clipClose').addEventListener('click', function () { state.clip = null; render(); });
+  }
+
+  // ---------- MASTER RENDER ----------
+  function render() {
+    var isWorld = state.mode === 'world';
+    $('#tabWorld').className = isWorld ? 'on' : 'off';
+    $('#tabTh').className = !isWorld ? 'on' : 'off';
+
+    if (DATA) {
+      $('#countTotal').textContent = DATA.counts.total;
+      $('#countSub').textContent = 'ไทย ' + DATA.counts.th + ' · โลก ' + DATA.counts.intl;
+    }
+
+    var isTemple = state.view === 'temple' && !!state.temple;
+    $('#mapView').style.display = isTemple ? 'none' : 'block';
+    $('#templeView').style.display = isTemple ? 'block' : 'none';
+
+    $('#mapLoading').style.display = (!state.geoReady && !state.geoErr) ? 'flex' : 'none';
+    $('#mapError').style.display = state.geoErr ? 'block' : 'none';
+
+    if (isTemple) {
+      renderTemple();
+      window.scrollTo(0, 0);
+    } else {
+      renderOverlays();
+      renderPanel();
+      renderCenterPopup();
+      renderMapSvg();
+      measure();
+    }
+    renderClipModal();
+  }
+
+  // ---------- WIRE UP ----------
+  $('#btnHome').addEventListener('click', goHome);
+  $('#tabWorld').addEventListener('click', function () { setMode('world'); });
+  $('#tabTh').addEventListener('click', function () { setMode('th'); });
+  $('#searchInput').addEventListener('input', function (e) { state.search = e.target.value; });
+  $('#searchInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') doSearch(); });
+  $('#btnEmpty').addEventListener('click', function () { state.onlyEmpty = !state.onlyEmpty; render(); });
+  $('#zoomChip').addEventListener('click', function () { state.place = null; render(); });
+  window.addEventListener('resize', function () { measure(true); });
+
+  // ---------- BOOT ----------
+  measure();
+  render();
+  loadAll()
+    .then(function () { computeAll(); state.geoReady = true; render(); })
+    .catch(function (e) { try { console.warn('map load failed', e); } catch (x) {} state.geoErr = true; render(); });
+})();
+</script>
+</body>
+</html>
