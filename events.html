@@ -104,23 +104,25 @@
       gap: 2px;
     }
 
-    .brand-home {
+    .site-nav {
       display: inline-flex;
-      align-items: center;
-      gap: 6px;
       border: 1.5px solid var(--border-strong);
       border-radius: var(--radius-pill);
-      padding: 7px 14px;
+      overflow: hidden;
       font-size: 12.5px;
       font-weight: 600;
+    }
+
+    .site-nav .nav-tab {
+      padding: 7px 13px;
       color: var(--text-2);
       white-space: nowrap;
       transition: all 0.15s ease;
     }
 
-    .brand-home:hover {
+    .site-nav a.nav-tab:hover,
+    .site-nav .nav-tab.on {
       background: var(--text);
-      border-color: var(--text);
       color: #fff;
     }
 
@@ -709,6 +711,10 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ───────────────── RESPONSIVE ───────────────── */
+    @media (max-width: 640px) {
+      .site-nav { font-size: 11px; }
+      .site-nav .nav-tab { padding: 6px 8px; }
+    }
     @media (max-width: 480px) {
       .brand-meta-count { display: none; }
       .card-title { font-size: 16px; }
@@ -735,7 +741,12 @@
         </div>
       </div>
       <div style="display: flex; align-items: center; gap: 14px;">
-        <a class="brand-home" href="./">▤ BOON NEWS</a>
+        <nav class="site-nav" aria-label="เมนูหลัก">
+          <a class="nav-tab" href="map.html">▦ แผนที่</a>
+          <a class="nav-tab" href="./">▤ กริด</a>
+          <span class="nav-tab on">▣ ข่าวงานบุญ</span>
+          <a class="nav-tab" href="analysis.html">▨ วิเคราะห์</a>
+        </nav>
         <div class="brand-meta">
           <span class="brand-meta-live"><span class="live-dot"></span>LIVE</span>
           <span class="brand-meta-count" id="upcoming-count"></span>
