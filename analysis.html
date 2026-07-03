@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOON NEWS · วิเคราะห์คลังข่าว 4 ปี</title>
+<meta name="description" content="วิเคราะห์คลังบทข่าว BOON NEWS ปี 2565–2568 — 8,607 พาดหัว 251 แหล่งข่าว เชื่อมกับข้อมูล Facebook 253 ศูนย์">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #EEF1F8; font-family: 'IBM Plex Sans Thai', sans-serif; color: #1B2348; min-height: 100vh; }
+  button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; padding: 0; }
+  a { color: inherit; }
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-thumb { background: #C7CEE0; border-radius: 6px; }
+
+  .mono { font-family: 'Space Mono', monospace; }
+
+  /* ===== APP BAR ===== */
+  .appbar { display: flex; align-items: center; gap: 22px; padding: 13px 28px; border-bottom: 1px solid #E4E8F3; background: rgba(255,255,255,0.94); backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 40; flex-wrap: wrap; }
+  .logo-link { display: flex; align-items: center; gap: 13px; text-decoration: none; }
+  .logo-stack { display: flex; flex-direction: column; gap: 3px; line-height: 1; }
+  .logo-boon { align-self: flex-start; background: linear-gradient(95deg, #FF9E33, #F5821F); padding: 2px 8px 3px; transform: skewX(-10deg); box-shadow: 0 2px 7px rgba(245,130,31,0.32); }
+  .logo-news { align-self: flex-start; margin-left: 6px; background: #15276B; padding: 2px 8px 3px; transform: skewX(-10deg); box-shadow: 0 2px 7px rgba(21,39,107,0.28); }
+  .logo-word { display: inline-block; transform: skewX(10deg); color: #fff; font-weight: 800; font-size: 15px; letter-spacing: 0.03em; }
+  .logo-sub { font-size: 13px; color: #6B7393; border-left: 1px solid #E4E8F3; padding-left: 13px; }
+  .seg { display: inline-flex; border: 1.5px solid #15276B; border-radius: 22px; overflow: hidden; font-size: 14px; font-weight: 600; }
+  .seg > * { padding: 7px 16px; white-space: nowrap; transition: all 0.15s ease; text-decoration: none; }
+  .seg .on { background: #15276B; color: #fff; }
+  .seg .off { background: transparent; color: #15276B; }
+
+  /* ===== LAYOUT ===== */
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 30px 32px 80px; }
+  .eyebrow { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #F5821F; margin-bottom: 9px; }
+  h1 { font-size: 33px; font-weight: 700; margin: 0; line-height: 1.15; color: #15276B; letter-spacing: -0.015em; }
+  .lede { font-size: 14.5px; color: #6B7393; margin: 10px 0 0; line-height: 1.6; max-width: 720px; }
+
+  .sec { margin-top: 46px; }
+  .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+  .sec-head h2 { font-size: 21px; font-weight: 700; margin: 0; color: #15276B; letter-spacing: -0.01em; }
+  .sec-note { font-family: 'Space Mono', monospace; font-size: 11px; color: #97A0BC; }
+
+  .card { background: #fff; border: 1px solid #E4E8F3; border-radius: 16px; padding: 22px 26px; box-shadow: 0 8px 26px rgba(20,33,92,0.06); }
+
+  /* KPI */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 22px; }
+  .kpi { background: #fff; border: 1px solid #E4E8F3; border-radius: 14px; padding: 16px 18px; }
+  .kpi .v { font-family: 'Space Mono', monospace; font-size: 26px; font-weight: 700; color: #15276B; line-height: 1; }
+  .kpi .l { font-size: 12px; color: #6B7393; margin-top: 6px; }
+
+  /* ตารางภาพรวมรายปี */
+  table.years { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table.years th, table.years td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #EEF1F8; vertical-align: top; }
+  table.years th { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #97A0BC; font-weight: 400; }
+  table.years td:first-child { color: #6B7393; white-space: nowrap; }
+  table.years td b { color: #15276B; }
+  .tbl-scroll { overflow-x: auto; }
+
+  /* กราฟรายเดือน */
+  .mchart { display: flex; align-items: flex-end; gap: 2px; height: 150px; margin-top: 6px; }
+  .mbar { flex: 1; min-width: 3px; background: rgba(245,130,31,0.42); border-radius: 3px 3px 0 0; position: relative; transition: background 0.12s ease; }
+  .mbar:hover { background: #15276B; }
+  .mbar.peak { background: #F5821F; }
+  .mbar.gap { background: repeating-linear-gradient(45deg, #E4E8F3, #E4E8F3 3px, transparent 3px, transparent 6px); }
+  .maxis { display: flex; gap: 2px; margin-top: 8px; }
+  .maxis span { flex: 1; text-align: center; font-family: 'Space Mono', monospace; font-size: 10.5px; color: #97A0BC; border-top: 1px solid #E4E8F3; padding-top: 6px; }
+  .mlegend { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 14px; font-size: 12px; color: #6B7393; }
+  .mlegend .it { display: inline-flex; align-items: center; gap: 7px; }
+  .mlegend .sw { width: 12px; height: 12px; border-radius: 3px; }
+
+  /* อันดับแหล่งข่าว */
+  .split { display: grid; grid-template-columns: 1fr 320px; gap: 22px; align-items: start; }
+  @media (max-width: 860px) { .split { grid-template-columns: 1fr; } }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .chip { font-size: 12.5px; font-weight: 500; border: 1.5px solid #D8DEEC; background: transparent; color: #6B7393; border-radius: 18px; padding: 6px 14px; transition: all 0.13s ease; }
+  .chip.on { border-color: #15276B; background: #15276B; color: #fff; }
+  .src-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+  .src-row .rk { font-family: 'Space Mono', monospace; font-size: 12px; color: #B3BAD0; width: 24px; flex-shrink: 0; }
+  .src-row .nm { width: 220px; flex-shrink: 0; font-size: 13.5px; color: #1B2348; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .src-row .nm .sub { display: block; font-size: 11px; color: #97A0BC; }
+  .src-row .bar { flex: 1; height: 16px; display: flex; border-radius: 4px; overflow: hidden; background: #F2F5FC; }
+  .src-row .bar span { display: block; height: 100%; }
+  .src-row .ct { font-family: 'Space Mono', monospace; font-size: 12.5px; width: 44px; text-align: right; color: #15276B; font-weight: 700; flex-shrink: 0; }
+  .yr-legend { display: flex; gap: 14px; margin: 4px 0 14px; font-family: 'Space Mono', monospace; font-size: 11px; color: #6B7393; }
+  .yr-legend .it { display: inline-flex; align-items: center; gap: 6px; }
+  .yr-legend .sw { width: 11px; height: 11px; border-radius: 3px; }
+  .show-more { margin-top: 12px; font-size: 13px; font-weight: 600; color: #15276B; border: 1.5px solid #D8DEEC; border-radius: 18px; padding: 7px 16px; }
+  .show-more:hover { border-color: #15276B; }
+
+  .country-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; font-size: 13px; }
+  .country-row .nm { width: 110px; flex-shrink: 0; color: #1B2348; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .country-row .bar { flex: 1; height: 9px; background: #F2F5FC; border-radius: 5px; overflow: hidden; }
+  .country-row .bar span { display: block; height: 100%; background: linear-gradient(90deg, #FF9E33, #F5821F); border-radius: 5px; }
+  .country-row .ct { font-family: 'Space Mono', monospace; font-size: 11.5px; width: 42px; text-align: right; color: #6B7393; flex-shrink: 0; }
+  .trend { margin-top: 18px; padding-top: 16px; border-top: 1px solid #EEF1F8; }
+  .trend .t-lbl { font-family: 'Space Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #97A0BC; margin-bottom: 8px; }
+  .trend .pill { display: inline-block; font-size: 12px; font-weight: 600; border-radius: 16px; padding: 4px 11px; margin: 0 6px 6px 0; }
+  .pill.up { background: rgba(31,138,91,0.1); color: #1F8A5B; }
+  .pill.down { background: rgba(190,60,60,0.08); color: #B33A3A; }
+
+  /* Quadrant */
+  .quad { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .quad { grid-template-columns: 1fr; } }
+  .q-cell { border-radius: 14px; padding: 18px 20px; border: 1px solid #E4E8F3; background: #fff; }
+  .q-cell .q-tag { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #97A0BC; }
+  .q-cell .q-num { font-family: 'Space Mono', monospace; font-size: 34px; font-weight: 700; line-height: 1.1; margin: 6px 0 4px; color: #15276B; }
+  .q-cell .q-name { font-size: 14.5px; font-weight: 700; color: #15276B; }
+  .q-cell .q-desc { font-size: 12.5px; color: #6B7393; margin-top: 5px; line-height: 1.5; }
+  .q-cell.hot { border-color: rgba(245,130,31,0.5); background: linear-gradient(180deg, rgba(245,130,31,0.06), #fff); }
+  .q-cell.hot .q-num { color: #F5821F; }
+
+  table.list { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.list th { font-family: 'Space Mono', monospace; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: #97A0BC; font-weight: 400; text-align: left; padding: 8px 10px; border-bottom: 1px solid #EEF1F8; }
+  table.list td { padding: 9px 10px; border-bottom: 1px solid #F4F6FB; vertical-align: top; }
+  table.list td.num { font-family: 'Space Mono', monospace; color: #15276B; font-weight: 700; white-space: nowrap; }
+  table.list .fb-a { color: #2563EB; text-decoration: none; font-size: 12px; }
+  table.list .muted { color: #6B7393; }
+
+  /* ปฏิทิน */
+  .cal { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+  .cal-cell { background: #fff; border: 1px solid #E4E8F3; border-radius: 14px; padding: 15px 17px; }
+  .cal-cell .m { font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; color: #F5821F; margin-bottom: 7px; }
+  .cal-cell .tx { font-size: 12.5px; color: #3A4360; line-height: 1.55; }
+
+  /* เส้นเรื่อง */
+  .story-list { display: grid; gap: 10px; }
+  .story-item { display: flex; gap: 16px; background: #fff; border: 1px solid #E4E8F3; border-radius: 14px; padding: 15px 18px; }
+  .story-item .n { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; color: #F5821F; flex-shrink: 0; width: 26px; }
+  .story-item .tt { font-size: 14px; font-weight: 700; color: #15276B; }
+  .story-item .tx { font-size: 13px; color: #6B7393; margin-top: 3px; line-height: 1.55; }
+
+  /* หัวข้อคลิป */
+  .topic-row { display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; border-bottom: 1px solid #F4F6FB; }
+  .topic-row:last-child { border-bottom: none; }
+  .topic-row .tt { flex: 1; font-size: 14px; font-weight: 600; color: #1B2348; line-height: 1.45; }
+  .topic-row .tt .src { display: block; font-size: 12px; font-weight: 400; color: #97A0BC; margin-top: 3px; }
+  .tag { flex-shrink: 0; font-family: 'Space Mono', monospace; font-size: 10.5px; border-radius: 14px; padding: 4px 11px; white-space: nowrap; }
+  .tag.why { background: rgba(21,39,107,0.08); color: #15276B; }
+  .tag.world { background: rgba(245,130,31,0.12); color: #C4650F; }
+
+  .foot { margin-top: 40px; font-family: 'Space Mono', monospace; font-size: 11px; color: #97A0BC; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<!-- ===== APP BAR ===== -->
+<header class="appbar">
+  <a class="logo-link" href="./">
+    <span class="logo-stack">
+      <span class="logo-boon"><span class="logo-word">BOON</span></span>
+      <span class="logo-news"><span class="logo-word">NEWS</span></span>
+    </span>
+    <span class="logo-sub">วิเคราะห์คลังข่าว 4 ปี</span>
+  </a>
+
+  <div class="seg">
+    <a class="off" href="map.html">▦ แผนที่</a>
+    <a class="off" href="index.html">▤ กริด</a>
+    <a class="off" href="events.html">▣ ข่าวงานบุญ</a>
+    <span class="on">▨ วิเคราะห์</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ===== HERO ===== -->
+  <div class="eyebrow">— data room · 2565–2568</div>
+  <h1>วิเคราะห์คลังข่าว BOON NEWS 4 ปี</h1>
+  <p class="lede">สกัดพาดหัวจากบทรายการหลัก ~6,900 ไฟล์ (.docx) ตลอดปี 2565–2568 เชื่อมกับทะเบียน Facebook 253 ศูนย์ — เห็นทั้งจังหวะข่าวรายเดือน ใครส่งข่าวมากแค่ไหน และช่องว่างที่ยังไม่ถูกเล่า</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">8,607</div><div class="l">พาดหัวข่าวที่สกัดได้ (4 ปี)</div></div>
+    <div class="kpi"><div class="v">1,124</div><div class="l">วันที่มีบทออกอากาศ</div></div>
+    <div class="kpi"><div class="v">251</div><div class="l">แหล่งข่าว (วัด/ศูนย์)</div></div>
+    <div class="kpi"><div class="v">76.6%</div><div class="l">ระบุแหล่งข่าวได้ (6,589 ชิ้น)</div></div>
+  </div>
+
+  <!-- ===== ภาพรวมรายปี ===== -->
+  <div class="sec">
+    <div class="sec-head">
+      <h2>ภาพรวมรายปี — ฟอร์แมตนิ่ง แต่ปริมาณข่าวลดลงเรื่อย ๆ</h2>
+      <span class="sec-note">9 → 6.8 ข่าว/วัน ใน 4 ปี</span>
+    </div>
+    <div class="card tbl-scroll">
+      <table class="years">
+        <tr><th>มิติ</th><th>2565</th><th>2566</th><th>2567</th><th>2568</th></tr>
+        <tr><td>วันที่มีบท</td><td><b>298</b> (12 เดือน)</td><td><b>270</b> (11 เดือน — ธ.ค.หาย)</td><td><b>300</b> (12 เดือน)</td><td><b>256</b> (10 เดือน — เม.ย.–พ.ค.ไม่มีบท)</td></tr>
+        <tr><td>พาดหัวที่สกัดได้</td><td><b>2,564</b></td><td><b>2,151</b></td><td><b>2,174</b></td><td><b>1,718</b></td></tr>
+        <tr><td>ข่าวเฉลี่ย/วัน</td><td>~9</td><td>~8.5</td><td>7.3</td><td>6.8</td></tr>
+        <tr><td>สัดส่วนข่าวต่างประเทศ</td><td>~44%</td><td>~47%</td><td>~46%</td><td>~38% (ไต่ขึ้นระหว่างปี)</td></tr>
+        <tr><td>ตารางออกอากาศ</td><td>เกือบทุกวัน</td><td>เกือบทุกวัน</td><td>จันทร์–เสาร์ (งดอาทิตย์)</td><td>จันทร์–เสาร์ · 28 มี.ค.งด (แผ่นดินไหว)</td></tr>
+        <tr><td>ฟอร์แมต</td><td colspan="4">โครงเดิมทุกวัน ~1,100+ ตอน: การ์ดโอวาทเปิด → ข่าว → ปชส. → พุทธสุภาษิตปิด (ปี 67 เพิ่มเบรก 3 ช่วง/วัน · ปี 68 เพิ่ม CG TOP10 ธัมมจักฯ)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== จังหวะรายเดือน ===== -->
+  <div class="sec">
+    <div class="sec-head">
+      <h2>จังหวะข่าวรายเดือน · ม.ค. 2565 – ธ.ค. 2568</h2>
+      <span class="sec-note" id="mchartNote">นับจากแหล่งข่าว Top 60</span>
+    </div>
+    <div class="card">
+      <div class="mchart" id="mchart"></div>
+      <div class="maxis" id="maxis"></div>
+      <div class="mlegend">
+        <span class="it"><span class="sw" style="background: #F5821F;"></span> เดือนพีคของปี</span>
+        <span class="it"><span class="sw" style="background: rgba(245,130,31,0.42);"></span> เดือนปกติ</span>
+        <span class="it"><span class="sw" style="background: repeating-linear-gradient(45deg, #E4E8F3, #E4E8F3 3px, #fff 3px, #fff 6px);"></span> ไม่มีบทในเซิร์ฟเวอร์ (ธ.ค.66 · เม.ย.–พ.ค.68)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ใครส่งข่าว ===== -->
+  <div class="sec">
+    <div class="sec-head">
+      <h2>ใครส่งข่าวมากแค่ไหน</h2>
+      <span class="sec-note">ไทย 169 แหล่ง = 2,518 ข่าว ≈ สหรัฐฯ 18 วัด = 2,484 ข่าว</span>
+    </div>
+    <div class="split">
+      <div class="card">
+        <div class="chips" id="srcChips">
+          <button class="chip on" data-f="all">ทั้งหมด</button>
+          <button class="chip" data-f="วัดสาขาต่างประเทศ">วัดสาขาต่างประเทศ</button>
+          <button class="chip" data-f="ศูนย์ในประเทศ">ศูนย์ในประเทศ</button>
+        </div>
+        <div class="yr-legend">
+          <span class="it"><span class="sw" style="background: rgba(245,130,31,0.30);"></span>65</span>
+          <span class="it"><span class="sw" style="background: rgba(245,130,31,0.50);"></span>66</span>
+          <span class="it"><span class="sw" style="background: rgba(245,130,31,0.72);"></span>67</span>
+          <span class="it"><span class="sw" style="background: #F5821F;"></span>68</span>
+        </div>
+        <div id="srcList"></div>
+        <button class="show-more" id="srcMore">แสดงเพิ่ม ↓</button>
+      </div>
+      <div>
+        <div class="card">
+          <div class="sec-note" style="margin-bottom: 12px;">รายประเทศ · รวม 4 ปี</div>
+          <div id="countryList"></div>
+          <div class="trend">
+            <div class="t-lbl">มาแรงขึ้น</div>
+            <span class="pill up">เท็กซัส 34→50</span><span class="pill up">ปาล์มบีช 38→52</span><span class="pill up">สหราชอาณาจักร 40→69</span><span class="pill up">ออสเตรเลีย 7→28</span>
+            <div class="t-lbl" style="margin-top: 10px;">แผ่วลง</div>
+            <span class="pill down">เทนเนสซี 49→23</span><span class="pill down">ซีแอตเติล 68→44</span><span class="pill down">ญี่ปุ่น 181→90</span><span class="pill down">เดนมาร์ก 26→3</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== QUADRANT ===== -->
+  <div class="sec">
+    <div class="sec-head">
+      <h2>สถานะ 253 ศูนย์ — เพจ Facebook คึกไหม × เคยขึ้นจอไหม</h2>
+      <span class="sec-note">เชื่อมบทข่าว 4 ปี × ทะเบียน FB (มิ.ย. 2569)</span>
+    </div>
+    <div class="quad" id="quadGrid"></div>
+
+    <div class="split" style="margin-top: 22px;">
+      <div class="card">
+        <div class="sec-note" style="margin-bottom: 4px;">กลุ่ม B · โอกาสทันที</div>
+        <div style="font-size: 15px; font-weight: 700; color: #15276B; margin-bottom: 12px;">เพจคึกคักแต่ไม่เคยขึ้นจอเลยใน 4 ปี — คิววัตถุดิบต้นทุนต่ำสุด</div>
+        <div class="tbl-scroll"><table class="list" id="groupBTable">
+          <tr><th>ศูนย์</th><th>ที่ตั้ง</th><th>followers</th><th>กิจกรรมบนเพจ</th><th></th></tr>
+        </table></div>
+      </div>
+      <div class="card">
+        <div class="sec-note" style="margin-bottom: 4px;">กลุ่ม C ตัวท็อป</div>
+        <div style="font-size: 15px; font-weight: 700; color: #15276B; margin-bottom: 12px;">ข่าวเยอะแต่หน้าบ้าน FB อ่อน — BOON NEWS คือปากเสียงเดียว</div>
+        <div class="tbl-scroll"><table class="list" id="groupCTable">
+          <tr><th>ข่าว 4 ปี</th><th>ศูนย์</th><th>สถานะเพจ</th></tr>
+        </table></div>
+        <p style="font-size: 12.5px; color: #6B7393; line-height: 1.6; margin: 14px 0 0;">นัย: หน้า temple page บนเว็บนี้จะกลายเป็น "หน้าแรกอย่างเป็นทางการ" ของวัดกลุ่มนี้บนอินเทอร์เน็ตทันที — SEO ไร้คู่แข่ง และอำนาจต่อรองขอวัตถุดิบดิบ/สัมภาษณ์สูง</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ปฏิทินงานบุญ ===== -->
+  <div class="sec">
+    <div class="sec-head">
+      <h2>ปฏิทินงานบุญประจำปี — ยืนยันจาก 4 ปีซ้อน ทำนายได้ 100%</h2>
+      <span class="sec-note">ใช้วางแผนคอนเทนต์ดักหน้าวาระได้ทั้งปี</span>
+    </div>
+    <div class="cal">
+      <div class="cal-cell"><div class="m">ม.ค.</div><div class="tx">ธรรมยาตรา (ปีที่ 13→14, พระ ~1,140 รูป) · วาระคุณยายอาจารย์ · วันเด็ก</div></div>
+      <div class="cal-cell"><div class="m">ก.พ.</div><div class="tx">วันมหาปูชนียาจารย์ (3 ก.พ.) · มาฆบูชา · World-PEC / มอบโล่ทางก้าวหน้า</div></div>
+      <div class="cal-cell"><div class="m">มี.ค.–เม.ย.</div><div class="tx">บวชสามเณรฤดูร้อน (→5,000 รูปทั่วไทย) · สงกรานต์ · วันคุ้มครองโลก 22 เม.ย. · มุทิตาหลวงพ่อธัมมชโย</div></div>
+      <div class="cal-cell"><div class="m">พ.ค.–มิ.ย.</div><div class="tx">วิสาขบูชา + เวทีนานาชาติ (UN Vesak) · เริ่มขบวนกฐิน (สัมมนาประธาน)</div></div>
+      <div class="cal-cell"><div class="m">ก.ค.</div><div class="tx">บวชรุ่นเข้าพรรษา · บวชนานาชาติ (AEC/WAB) · อาสาฬหฯ–เข้าพรรษา</div></div>
+      <div class="cal-cell"><div class="m">ส.ค.</div><div class="tx">วันสมาธิโลก (6 ส.ค.) · วันธรรมชัย (27 ส.ค.) · ตักบาตรหมื่นรูปหาดใหญ่ (ปีที่ 22+) · มุทิตา ป.ธ.9</div></div>
+      <div class="cal-cell"><div class="m">ก.ย.</div><div class="tx">วันครูผู้ค้นพบวิชชาธรรมกาย · วันละสังขารคุณยายฯ (10 ก.ย.)</div></div>
+      <div class="cal-cell"><div class="m">ต.ค.</div><div class="tx">วาระพระมงคลเทพมุนี (10 ต.ค.) · เปิดฤดูกฐิน · ตักบาตรเทโว</div></div>
+      <div class="cal-cell"><div class="m">พ.ย.</div><div class="tx"><b style="color: #F5821F;">กฐินพีคสุดของปีทุกปี</b> (71–98 ข่าว/เดือน) · กฐินสัมฤทธิ์ V-Star · เตรียมธรรมยาตรา</div></div>
+      <div class="cal-cell"><div class="m">ธ.ค.</div><div class="tx">มุทิตาหลวงพ่อทัตตชีโว (วัดทั่วโลกจัดพร้อมกัน) · สวดมนต์ข้ามปี · งานอินเดีย-เนปาล</div></div>
+      <div class="cal-cell"><div class="m">ทุกเดือน</div><div class="tx">บูชาข้าวพระ (อาทิตย์ต้นเดือน ทุกศูนย์ทั่วโลกพร้อมกัน) · บุพเปตพลี · สังฆทาน 323 วัดชายแดนใต้ · คลาสสมาธิชาวท้องถิ่น</div></div>
+    </div>
+  </div>
+
+  <!-- ===== เส้นเรื่องข้ามปี ===== -->
+  <div class="sec">
+    <div class="sec-head">
+      <h2>เส้นเรื่องต่อเนื่องข้ามปี — ซีรีส์ที่เดินเรื่องเองตลอด 4 ปี</h2>
+    </div>
+    <div class="story-list">
+      <div class="story-item"><span class="n">1</span><div><div class="tt">ธรรมยาตรา ปีที่ 10 → 13</div><div class="tx">หมวดเดียวที่มีสัมภาษณ์คนจริงสม่ำเสมอ + ดีเทลใหม่ทุกปี (ปี 68: ครีมกันแดด 10,000 หลอด)</div></div></div>
+      <div class="story-item"><span class="n">2</span><div><div class="tt">ยอดสวดธัมมจักกัปปวัตตนสูตร</div><div class="tx">4,200 ล้าน (ต้น 65) → 5,556 ล้าน (ส.ค.66) → 6,481 ล้าน (67) — โตต่อเนื่อง มี CG TOP10 รายจังหวัดในปี 68</div></div></div>
+      <div class="story-item"><span class="n">3</span><div><div class="tt">ชายแดนใต้ — ยืนหยัด 20+ ปี</div><div class="tx">สังฆทาน 323 วัด ครั้งที่ 157 → 165+ · ตักบาตรหมื่นรูปหาดใหญ่ ปีที่ 19 → 22 — ตัวเลขสะสมจริง</div></div></div>
+      <div class="story-item"><span class="n">4</span><div><div class="tt">สเกลแคมเปญโตแบบขั้นบันได</div><div class="tx">กฐิน 5,000 วัด (66) → 30,000 วัด (67–68) · บวช 3,000 รูป → สามเณร 5,000 รูปทั่วไทย → ฎีกา 40,000 วัด (68)</div></div></div>
+      <div class="story-item"><span class="n">5</span><div><div class="tt">งานภัยพิบัติกลายเป็นหมวดถาวร</div><div class="tx">น้ำท่วม 26 ข่าว (65) → ซีรีส์ 8+ จังหวัด (67) → ถุงยังชีพ 1,500 ชุด + 15 ตันลงใต้ (68) + แผ่นดินไหว 28 มี.ค.68 — วันเดียวที่งดออกอากาศใน 4 ปี</div></div></div>
+      <div class="story-item"><span class="n">6</span><div><div class="tt">นานาชาติเข้มขึ้นทุกปี</div><div class="tx">บวชยุโรป 9 ประเทศ (66) → สามเณรมาร์มา บังกลาเทศครั้งแรก + เนปาล 1,250 รูป (67) → บวช 8 ประเทศ 3 ทวีปที่โจฮันเนสเบิร์ก (68)</div></div></div>
+      <div class="story-item"><span class="n">7</span><div><div class="tt">โครงสร้างพื้นฐานสื่อขยับ</div><div class="tx">ปี 67 ระบบเบรกสั้น 3 ช่วง/วัน · ปี 68 มีไฟล์ "BOON NEWS ENG" ครั้งแรก + วัดสาขาเริ่มส่งบทดิบเอง ~79 ไฟล์ (จอร์เจียส่ง 39)</div></div></div>
+    </div>
+  </div>
+
+  <!-- ===== หัวข้อคลิป ===== -->
+  <div class="sec">
+    <div class="sec-head">
+      <h2>หัวข้อคลิปที่ขุดจากคลังจริง</h2>
+      <span class="sec-note">วัตถุดิบมีข่าวจริงรองรับหลายปีซ้อน</span>
+    </div>
+    <div class="card">
+      <div class="topic-row"><div class="tt">ทำไมพระ 1,141 รูปต้องเดินเท้า 13 ปีติดต่อกัน? (และทำไมต้องครีมกันแดด 10,000 หลอด)<span class="src">ธรรมยาตรา 4 ปีซ้อน + สัมภาษณ์</span></div><span class="tag why">บุญ WHY</span></div>
+      <div class="topic-row"><div class="tt">เลี้ยงพระหมื่นรูปในเช้าเดียว ทำยังไง?<span class="src">ตักบาตรหาดใหญ่ปีที่ 22 / โคราช 556 ปี / กาญจนบุรี</span></div><span class="tag why">บุญ WHY</span></div>
+      <div class="topic-row"><div class="tt">กฐิน 30,000 วัดในเดือนเดียว เป็นไปได้ยังไง?<span class="src">แคมเปญ 67–68 + กฐินสัมฤทธิ์ V-Star</span></div><span class="tag why">บุญ WHY</span></div>
+      <div class="topic-row"><div class="tt">ทำไมคนเม็กซิกัน 80 คนมานั่งสมาธิแบบไทย?<span class="src">บทดิบเม็กซิโก (แอนเดรีย) ปี 68</span></div><span class="tag world">บุญรอบโลก</span></div>
+      <div class="topic-row"><div class="tt">บวชพระ 8 ประเทศ 3 ทวีป — ที่แอฟริกาใต้?!<span class="src">โจฮันเนสเบิร์ก 68 + AEC/WAB + มาร์มา บังกลาเทศ 67</span></div><span class="tag world">บุญรอบโลก</span></div>
+      <div class="topic-row"><div class="tt">เมื่อน้ำมา วัดกลายเป็นอะไร?<span class="src">ซีรีส์ภัยพิบัติ 4 ปี + มุ้งยักษ์แผ่นดินไหว 68</span></div><span class="tag why">บุญ WHY</span></div>
+      <div class="topic-row"><div class="tt">สวดมนต์ 6,000 ล้านจบ นับกันยังไง?<span class="src">ยอดธัมมจักฯ + CG TOP10 รายจังหวัด</span></div><span class="tag why">บุญ WHY</span></div>
+      <div class="topic-row"><div class="tt">ทำไมต้องกลับไปบวชที่เนปาล ดินแดนประสูติ?<span class="src">สามเณร 1,250 รูป เนปาล 67 + ลุมพินี 66</span></div><span class="tag world">บุญรอบโลก</span></div>
+      <div class="topic-row"><div class="tt">เด็กประถมเป็นประธานกฐินได้ด้วยเหรอ?<span class="src">กฐินสัมฤทธิ์ V-Star ปีที่ 15–18</span></div><span class="tag why">บุญ WHY</span></div>
+      <div class="topic-row"><div class="tt">วัดไทยเมืองหนาว −20° ใช้ชีวิตยังไง?<span class="src">วัดสวีเดน/นอร์เวย์/ไอซ์แลนด์/แคนาดา (ข่าวต่อเนื่อง 4 ปี)</span></div><span class="tag world">บุญรอบโลก</span></div>
+    </div>
+  </div>
+
+  <div class="foot" id="foot">
+    วิธีนับ: สกัดพาดหัวข่าวจากบทรายการหลัก BOON NEWS วันละ 1 ไฟล์ แล้วระบุชื่อวัด/ศูนย์จากพาดหัว · ระบุแหล่งได้ 6,589 จาก 8,607 ชิ้น (76.6%)<br>
+    ช่องว่างข้อมูล: ธ.ค.2566 · เม.ย.–พ.ค.2568 ไม่มีบทในเซิร์ฟเวอร์ · แหล่งข้อมูล: สรุปข่าวรายวัด_2565-2568.xlsx + ทะเบียน Facebook 253 ศูนย์ (มิ.ย. 2569)
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var DATA = null;
+  var srcFilter = 'all';
+  var srcLimit = 15;
+
+  function esc(s) { return ('' + s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+  // ---------- กราฟรายเดือน ----------
+  function renderMonthly() {
+    var m = DATA.months;
+    var host = document.getElementById('mchart');
+    var axis = document.getElementById('maxis');
+    var max = Math.max.apply(null, m.total);
+    // ค่าจากชีตตามป้ายเดือน (ชีตข้ามเดือนที่ไม่มีบทไปเลย — เติมกลับเป็นแถบ gap)
+    var byLabel = {};
+    m.labels.forEach(function (lb, i) { byLabel[lb] = m.total[i]; });
+    var MONTHS = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    var full = [];
+    ['65', '66', '67', '68'].forEach(function (y) {
+      MONTHS.forEach(function (mo) {
+        var lb = mo + y;
+        full.push({ label: lb, year: y, v: byLabel[lb], gap: !(lb in byLabel) });
+      });
+    });
+    // หาพีคของแต่ละปี
+    var peaks = {};
+    full.forEach(function (d, i) {
+      if (d.gap) return;
+      if (!(d.year in peaks) || d.v > full[peaks[d.year]].v) peaks[d.year] = i;
+    });
+    var peakSet = {};
+    Object.keys(peaks).forEach(function (y) { peakSet[peaks[y]] = true; });
+
+    host.innerHTML = '';
+    full.forEach(function (d, i) {
+      var bar = document.createElement('div');
+      bar.className = 'mbar' + (d.gap ? ' gap' : (peakSet[i] ? ' peak' : ''));
+      bar.style.height = d.gap ? '100%' : Math.max(2, Math.round(d.v / max * 100)) + '%';
+      bar.title = d.label.slice(0, -2) + ' 25' + d.year + ' · ' + (d.gap ? 'ไม่มีบทในเซิร์ฟเวอร์' : d.v + ' ข่าว');
+      host.appendChild(bar);
+    });
+    // แกนปี: ปีละ 12 เดือนเท่ากัน
+    axis.innerHTML = '';
+    ['65', '66', '67', '68'].forEach(function (y) {
+      var span = document.createElement('span');
+      span.style.flex = 12;
+      span.textContent = 'ปี 25' + y;
+      axis.appendChild(span);
+    });
+  }
+
+  // ---------- อันดับแหล่งข่าว ----------
+  var YR_COLS = ['rgba(245,130,31,0.30)', 'rgba(245,130,31,0.50)', 'rgba(245,130,31,0.72)', '#F5821F'];
+
+  function renderSources() {
+    var list = DATA.sources;
+    if (srcFilter !== 'all') list = list.filter(function (s) { return s.cat === srcFilter; });
+    var shown = list.slice(0, srcLimit);
+    var max = shown.length ? shown[0].total : 1;
+    var host = document.getElementById('srcList');
+    var html = '';
+    shown.forEach(function (s, i) {
+      var segs = '';
+      s.y.forEach(function (v, yi) {
+        var w = (v / max * 100);
+        if (w > 0) segs += '<span style="width: ' + w + '%; background: ' + YR_COLS[yi] + ';" title="ปี 25' + (65 + yi) + ' · ' + v + ' ข่าว"></span>';
+      });
+      html += '<div class="src-row">' +
+        '<span class="rk">' + (i + 1 < 10 ? '0' : '') + (i + 1) + '</span>' +
+        '<span class="nm" title="' + esc(s.name) + '">' + esc(s.name) +
+        '<span class="sub">' + esc(s.country) + (s.cat ? ' · ' + esc(s.cat) : '') + '</span></span>' +
+        '<span class="bar">' + segs + '</span>' +
+        '<span class="ct">' + s.total + '</span></div>';
+    });
+    host.innerHTML = html || '<div style="color: #97A0BC; font-size: 13px;">ไม่มีข้อมูล</div>';
+    document.getElementById('srcMore').style.display = list.length > srcLimit ? 'inline-block' : 'none';
+  }
+
+  function renderCountries() {
+    var top = DATA.countries.slice(0, 10);
+    var max = top.length ? top[0].total : 1;
+    var html = '';
+    top.forEach(function (c) {
+      html += '<div class="country-row">' +
+        '<span class="nm" title="' + esc(c.country) + ' · ' + c.centers + ' แหล่ง">' + esc(c.country) + '</span>' +
+        '<span class="bar"><span style="width: ' + Math.max(2, Math.round(c.total / max * 100)) + '%;"></span></span>' +
+        '<span class="ct">' + c.total.toLocaleString() + '</span></div>';
+    });
+    document.getElementById('countryList').innerHTML = html;
+  }
+
+  // ---------- Quadrant ----------
+  var QUAD_META = {
+    A: { name: 'FB active + ส่งข่าว', desc: 'โหนดแข็งแรงของเครือข่าย (เฉลี่ย 31 ข่าว/ศูนย์ใน 4 ปี)', hot: false },
+    B: { name: 'FB active แต่ไม่มีข่าวเลยใน 4 ปี', desc: 'โอกาสทันที — มีคอนเทนต์อยู่แล้วบนเพจ แค่ยังไม่เคยถูกดึงเข้าจอ', hot: true },
+    C: { name: 'ส่งข่าวแต่ FB เงียบ/อ่อน/ไม่มีเพจ', desc: 'BOON NEWS คือปากเสียงเดียวของศูนย์กลุ่มนี้', hot: false },
+    D: { name: 'เงียบทั้งคู่', desc: 'หมุดว่างจริง — ตรงกับ gap analysis ที่ว่า ~60% ของศูนย์ไทยไม่เคยถูกถ่าย', hot: false },
+  };
+
+  function renderQuadrant() {
+    var q = DATA.quadrant;
+    var host = document.getElementById('quadGrid');
+    var html = '';
+    ['A', 'B', 'C', 'D'].forEach(function (k) {
+      var meta = QUAD_META[k];
+      html += '<div class="q-cell' + (meta.hot ? ' hot' : '') + '">' +
+        '<div class="q-tag">กลุ่ม ' + k + '</div>' +
+        '<div class="q-num">' + q.counts[k] + '</div>' +
+        '<div class="q-name">' + esc(meta.name) + '</div>' +
+        '<div class="q-desc">' + esc(meta.desc) + '</div></div>';
+    });
+    host.innerHTML = html;
+
+    var bT = document.getElementById('groupBTable');
+    q.groupB.forEach(function (r) {
+      var row = bT.insertRow();
+      row.innerHTML = '<td>' + esc(r.name) + '</td>' +
+        '<td class="muted">' + esc(r.place) + '</td>' +
+        '<td class="num">' + esc(r.followers || '—') + '</td>' +
+        '<td class="muted">' + esc(r.types || '—') + '</td>' +
+        '<td>' + (r.fb ? '<a class="fb-a" href="' + esc(r.fb) + '" target="_blank" rel="noopener">เพจ ↗</a>' : '') + '</td>';
+    });
+
+    var cT = document.getElementById('groupCTable');
+    q.groupC.forEach(function (r) {
+      var st = r.active ? 'เพจ' + r.active : (r.fb ? 'เพจอ่อน/ลิงก์มีปัญหา' : 'ไม่มีเพจ');
+      if (r.followers) st += ' (' + r.followers + ')';
+      var row = cT.insertRow();
+      row.innerHTML = '<td class="num">' + r.news4y + '</td>' +
+        '<td>' + esc(r.name) + '</td>' +
+        '<td class="muted">' + esc(st) + '</td>';
+    });
+  }
+
+  // ---------- WIRE ----------
+  document.querySelectorAll('#srcChips .chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      srcFilter = chip.dataset.f;
+      srcLimit = 15;
+      document.querySelectorAll('#srcChips .chip').forEach(function (c) { c.classList.toggle('on', c === chip); });
+      renderSources();
+    });
+  });
+  document.getElementById('srcMore').addEventListener('click', function () {
+    srcLimit += 20;
+    renderSources();
+  });
+
+  fetch('analysis.json')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      DATA = d;
+      renderMonthly();
+      renderSources();
+      renderCountries();
+      renderQuadrant();
+    })
+    .catch(function () {
+      document.getElementById('mchart').innerHTML = '<div style="color: #97A0BC; font-size: 13px;">โหลด analysis.json ไม่สำเร็จ — รัน python3 scripts/build_analysis_json.py ก่อน</div>';
+    });
+})();
+</script>
+</body>
+</html>
